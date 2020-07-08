@@ -1,0 +1,13 @@
+export("initProjectFromFolder", 
+       "buildMakefile",
+       "make", 
+       "libraryPath", 
+       "sourcePath", 
+       "includePath", 
+       "objPath", 
+       "installPath", 
+       "loadLibrary", 
+       "unloadLibrary",
+       "vcDebug")
+exportClasses("BSysSourceFile", 
+              "BSysCodeProject")
