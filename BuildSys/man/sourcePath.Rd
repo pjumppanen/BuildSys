@@ -1,5 +1,5 @@
-\name{libraryPath}
-\alias{libraryPath}
+\name{sourcePath}
+\alias{sourcePath}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Get the path to the built shared library
@@ -8,7 +8,7 @@ Get the path to the built shared library
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
-libraryPath(Object)
+sourcePath(Object)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

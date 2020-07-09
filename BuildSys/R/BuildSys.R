@@ -140,7 +140,6 @@ setMethod("makeBuildRule", "BSysSourceFile",
 setClass("BSysCodeProject",
   slots = c(
     ProjectName   = "character",
-    MakeID        = "integer",
     WorkingFolder = "character",
     SourceName    = "character",
     IncludeName   = "character",
@@ -188,7 +187,6 @@ setMethod("initialize", "BSysCodeProject",
            DEFINES=as.character(c()), 
            Debug=TRUE)
   {
-    .Object@MakeID        <- as.integer(trunc(runif(1,0,2^31)))
     .Object@ProjectName   <- ""
     .Object@WorkingFolder <- ""
     .Object@SourceName    <- ""
@@ -372,7 +370,6 @@ setMethod("initProjectFromFolder", "BSysCodeProject",
       FullPath <- addSlash(getwd())
     }
 
-    .Object@MakeID        <- as.integer(trunc(runif(1,0,2^31)))
     .Object@WorkingFolder <- FullPath
     .Object@ProjectName   <- Name
     .Object@SourceName    <- ""
@@ -472,7 +469,8 @@ setMethod("buildMakefile", "BSysCodeProject",
     # -------------------------------------------------------------------------
     idStamp <- function()
     {
-      IdStamp <- paste("# MakeID:", .Object@MakeID, "--Do not edit this line")
+      MakeID  <- digest(.Object, algo="md5")
+      IdStamp <- paste("# MakeID:", MakeID, "--Do not edit this line")
 
       return (IdStamp)
     }
@@ -670,10 +668,16 @@ setMethod("buildMakefile", "BSysCodeProject",
       MakefilePath <- paste(.Object@WorkingFolder, "makefile", sep="")
     }
 
+    Created <- FALSE
+
     if (!checkMakefile(MakefilePath) || Force)
     {
       createMakefile(MakefilePath)
-    }   
+
+      Created <- TRUE
+    }
+
+    return (Created)   
   }
 )
 
@@ -686,67 +690,78 @@ setGeneric("make", function(.Object, ...) standardGeneric("make"))
 setMethod("make", "BSysCodeProject",
   function(.Object, Operation="", Debug=NULL)
   {
-    DlibName <- dynlib(.Object@ProjectName)
+    runMake <- function(.Object, Operation)
+    {
+      DlibName <- dynlib(.Object@ProjectName)
 
-    # if Debug provided and different from current update and increment MakeID 
+      ObjFolder    <- paste(.Object@WorkingFolder, .Object@ObjName, sep="")
+      CapturePath  <- paste(.Object@WorkingFolder, .Object@ProjectName, ".log", sep="")
+      ScriptPath   <- paste(.Object@WorkingFolder, .Object@ProjectName, ".sh", sep="")
+      FinishedFile <- paste(.Object@WorkingFolder, .Object@ProjectName, ".fin", sep="")
+
+      # run make
+      if (Operation == "clean")
+      {
+        operation <- paste("make -C", ObjFolder, "clean | tee", CapturePath)
+      } 
+      else if (Operation == "")
+      {
+        operation <- paste("make -C", ObjFolder, "| tee", CapturePath)
+      }
+      else
+      {
+        stop("Undefined make() Operation")
+      }
+
+      # construct caller script
+      BashScript <- c("#!/bin/bash",
+                      operation,
+                      paste("echo finished >", FinishedFile))
+
+      ScriptFile <- file(ScriptPath, "wt")
+      writeLines(BashScript, ScriptFile)
+      close(ScriptFile)
+
+      command.line <- paste(Sys.which("bash"), ScriptPath)
+      unlink(FinishedFile)
+
+      unloadLibrary(.Object)
+      system(command.line, wait=FALSE, invisible=FALSE, intern=FALSE)
+
+      # test for completion of script. We do this rather than using
+      # wait=TRUE in system call so that we can make a visible shell that 
+      # shows live progress. With wait=TRUE a visible shell shows no
+      # output. 
+      while (!file.exists(FinishedFile))
+      {
+        Sys.sleep(1)
+      }
+
+      unlink(FinishedFile)
+
+      CaptureFile <- file(CapturePath, "rt")
+      writeLines(readLines(CaptureFile))
+      close(CaptureFile)
+      unlink(CapturePath)
+    }
+
+    # if Debug provided and different from current update 
     if (!is.null(Debug) && (Debug != .Object@IsDebug))
     {
       .Object@IsDebug <- Debug
-      .Object@MakeID  <- as.integer(.Object@MakeID + 1)
     }
 
     # build makefile
-    buildMakefile(.Object)
-
-    ObjFolder    <- paste(.Object@WorkingFolder, .Object@ObjName, sep="")
-    CapturePath  <- paste(.Object@WorkingFolder, .Object@ProjectName, ".log", sep="")
-    ScriptPath   <- paste(.Object@WorkingFolder, .Object@ProjectName, ".sh", sep="")
-    FinishedFile <- paste(.Object@WorkingFolder, .Object@ProjectName, ".fin", sep="")
-
-    # run make
-    if (Operation == "clean")
+    if (buildMakefile(.Object))
     {
-      operation <- paste("make -C", ObjFolder, "clean | tee", CapturePath)
-    } 
-    else if (Operation == "")
-    {
-      operation <- paste("make -C", ObjFolder, "| tee", CapturePath)
-    }
-    else
-    {
-      stop("Undefined make() Operation")
+      if (Operation != "clean")
+      {
+        # as the makefile has changed do a clean to force a complete re-build
+        runMake(.Object, "clean")
+      }
     }
 
-    # construct caller script
-    BashScript <- c("#!/bin/bash",
-                    operation,
-                    paste("echo finished >", FinishedFile))
-
-    ScriptFile <- file(ScriptPath, "wt")
-    writeLines(BashScript, ScriptFile)
-    close(ScriptFile)
-
-    command.line <- paste(Sys.which("bash"), ScriptPath)
-    unlink(FinishedFile)
-
-    unloadLibrary(.Object)
-    system(command.line, wait=FALSE, invisible=FALSE, intern=FALSE)
-
-    # test for completion of script. We do this rather than using
-    # wait=TRUE in system call so that we can make a visible shell that 
-    # shows live progress. With wait=TRUE a visible shell shows no
-    # output. 
-    while (!file.exists(FinishedFile))
-    {
-      Sys.sleep(1)
-    }
-
-    unlink(FinishedFile)
-
-    CaptureFile <- file(CapturePath, "rt")
-    writeLines(readLines(CaptureFile))
-    close(CaptureFile)
-    unlink(CapturePath)
+    runMake(.Object, Operation)
 
     return (.Object)   
   }

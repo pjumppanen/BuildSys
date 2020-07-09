@@ -1,3 +1,4 @@
+importFrom("digest", "digest")
 export("initProjectFromFolder", 
        "buildMakefile",
        "make", 
