@@ -30,7 +30,10 @@ initProjectFromFolder(Object, Name = "", WorkingFolder = "", SourceName = "src",
   \item{ObjName}{
 %%     ~~Describe \code{ObjName} here~~
 }
-  \item{InstallName}{
+  \item{InstallLibraryName}{
+%%     ~~Describe \code{InstallName} here~~
+}
+  \item{InstallIncludeName}{
 %%     ~~Describe \code{InstallName} here~~
 }
   \item{Flat}{

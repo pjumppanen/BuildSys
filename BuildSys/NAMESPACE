@@ -6,9 +6,10 @@ export("initProjectFromFolder",
        "sourcePath", 
        "includePath", 
        "objPath", 
-       "installPath", 
+       "installLibraryPath", 
+       "installIncludePath", 
        "loadLibrary", 
        "unloadLibrary",
        "vcDebug")
 exportClasses("BSysSourceFile", 
-              "BSysCodeProject")
+              "BSysProject")

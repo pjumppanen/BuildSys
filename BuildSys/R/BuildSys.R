@@ -137,28 +137,29 @@ setMethod("makeBuildRule", "BSysSourceFile",
 # -----------------------------------------------------------------------------
 # class reprensenting a project and the files that define it
 # -----------------------------------------------------------------------------
-setClass("BSysCodeProject",
+setClass("BSysProject",
   slots = c(
-    ProjectName   = "character",
-    WorkingFolder = "character",
-    SourceName    = "character",
-    IncludeName   = "character",
-    ObjName       = "character",
-    InstallName   = "character",
-    Flat          = "logical",
-    SourceFiles   = "list",
-    Packages      = "character",
-    Includes      = "character",
-    Defines       = "character",
-    Libraries     = "character",
-    CFLAGS        = "character",
-    CXXFLAGS      = "character",
-    FFLAGS        = "character",
-    LDFLAGS       = "character", 
-    LDLIBS        = "character", 
-    DEFINES       = "character", 
-    IsDebug       = "logical",
-    DebugState    = "list"
+    ProjectName         = "character",
+    WorkingFolder       = "character",
+    SourceName          = "character",
+    IncludeName         = "character",
+    ObjName             = "character",
+    InstallLibraryName  = "character",
+    InstallIncludeName  = "character",    
+    Flat                = "logical",
+    SourceFiles         = "list",
+    Packages            = "character",
+    Includes            = "character",
+    Defines             = "character",
+    Libraries           = "character",
+    CFLAGS              = "character",
+    CXXFLAGS            = "character",
+    FFLAGS              = "character",
+    LDFLAGS             = "character", 
+    LDLIBS              = "character", 
+    DEFINES             = "character", 
+    IsDebug             = "logical",
+    DebugState          = "list"
   )
 )
 
@@ -166,14 +167,15 @@ setClass("BSysCodeProject",
 # -----------------------------------------------------------------------------
 # Constructor for CodeProject class
 # -----------------------------------------------------------------------------
-setMethod("initialize", "BSysCodeProject",
+setMethod("initialize", "BSysProject",
   function(.Object, 
            Name="",
            WorkingFolder="", 
            SourceName="src",
            IncludeName="include",
            ObjName="obj",
-           InstallName="obj",
+           InstallLibraryName=as.character(NULL),
+           InstallIncludeName=as.character(NULL),
            Flat=TRUE,
            Packages=as.character(c()), 
            Includes=as.character(c()), 
@@ -187,26 +189,27 @@ setMethod("initialize", "BSysCodeProject",
            DEFINES=as.character(c()), 
            Debug=TRUE)
   {
-    .Object@ProjectName   <- ""
-    .Object@WorkingFolder <- ""
-    .Object@SourceName    <- ""
-    .Object@IncludeName   <- ""
-    .Object@ObjName       <- ""
-    .Object@InstallName   <- ""
-    .Object@Flat          <- TRUE
-    .Object@SourceFiles   <- list()
-    .Object@Packages      <- Packages
-    .Object@Includes      <- c(R.home("include"), Includes)
-    .Object@Defines       <- Defines
-    .Object@Libraries     <- Libraries
-    .Object@CFLAGS        <- CFLAGS
-    .Object@CXXFLAGS      <- CXXFLAGS
-    .Object@FFLAGS        <- FFLAGS
-    .Object@LDFLAGS       <- LDFLAGS
-    .Object@LDLIBS        <- LDLIBS
-    .Object@DEFINES       <- DEFINES 
-    .Object@IsDebug       <- Debug
-    .Object@DebugState    <- list()
+    .Object@ProjectName         <- ""
+    .Object@WorkingFolder       <- ""
+    .Object@SourceName          <- ""
+    .Object@IncludeName         <- ""
+    .Object@ObjName             <- ""
+    .Object@InstallLibraryName  <- as.character(NULL)
+    .Object@InstallIncludeName  <- as.character(NULL)
+    .Object@Flat                <- TRUE
+    .Object@SourceFiles         <- list()
+    .Object@Packages            <- Packages
+    .Object@Includes            <- c(R.home("include"), Includes)
+    .Object@Defines             <- Defines
+    .Object@Libraries           <- Libraries
+    .Object@CFLAGS              <- CFLAGS
+    .Object@CXXFLAGS            <- CXXFLAGS
+    .Object@FFLAGS              <- FFLAGS
+    .Object@LDFLAGS             <- LDFLAGS
+    .Object@LDLIBS              <- LDLIBS
+    .Object@DEFINES             <- DEFINES 
+    .Object@IsDebug             <- Debug
+    .Object@DebugState          <- list()
 
     return (initProjectFromFolder(.Object,
                                   Name, 
@@ -214,7 +217,8 @@ setMethod("initialize", "BSysCodeProject",
                                   SourceName,
                                   IncludeName,
                                   ObjName,
-                                  InstallName,
+                                  InstallLibraryName,
+                                  InstallIncludeName,
                                   Flat,
                                   Packages, 
                                   Includes,
@@ -236,14 +240,15 @@ setMethod("initialize", "BSysCodeProject",
 # -----------------------------------------------------------------------------
 setGeneric("initProjectFromFolder", function(.Object, ...) standardGeneric("initProjectFromFolder"))
 
-setMethod("initProjectFromFolder", "BSysCodeProject",
+setMethod("initProjectFromFolder", "BSysProject",
   function(.Object, 
            Name="",
            WorkingFolder="", 
            SourceName="src",
            IncludeName="include",
            ObjName="obj",
-           InstallName="obj",
+           InstallLibraryName=as.character(NULL),
+           InstallIncludeName=as.character(NULL),
            Flat=TRUE,
            Packages=as.character(c()), 
            Includes=as.character(c()), 
@@ -370,34 +375,44 @@ setMethod("initProjectFromFolder", "BSysCodeProject",
       FullPath <- addSlash(getwd())
     }
 
-    .Object@WorkingFolder <- FullPath
-    .Object@ProjectName   <- Name
-    .Object@SourceName    <- ""
-    .Object@IncludeName   <- ""
-    .Object@ObjName       <- ""
-    .Object@InstallName   <- ""
-    .Object@Flat          <- Flat
-    .Object@SourceFiles   <- list()
-    .Object@Packages      <- Packages
-    .Object@Includes      <- c(R.home("include"), Includes)
-    .Object@Defines       <- Defines
-    .Object@Libraries     <- c(paste(RLIBPATH, "/R", sep=""), Libraries)
-    .Object@CFLAGS        <- CFLAGS
-    .Object@CXXFLAGS      <- CXXFLAGS
-    .Object@FFLAGS        <- FFLAGS
-    .Object@LDFLAGS       <- LDFLAGS
-    .Object@LDLIBS        <- LDLIBS
-    .Object@DEFINES       <- DEFINES
-    .Object@IsDebug       <- Debug
-    .Object@DebugState    <- list()
+    .Object@WorkingFolder       <- FullPath
+    .Object@ProjectName         <- Name
+    .Object@SourceName          <- ""
+    .Object@IncludeName         <- ""
+    .Object@ObjName             <- ""
+    .Object@InstallLibraryName  <- as.character(NULL)
+    .Object@InstallIncludeName  <- as.character(NULL)
+    .Object@Flat                <- Flat
+    .Object@SourceFiles         <- list()
+    .Object@Packages            <- Packages
+    .Object@Includes            <- c(R.home("include"), Includes)
+    .Object@Defines             <- Defines
+    .Object@Libraries           <- c(paste(RLIBPATH, "/R", sep=""), Libraries)
+    .Object@CFLAGS              <- CFLAGS
+    .Object@CXXFLAGS            <- CXXFLAGS
+    .Object@FFLAGS              <- FFLAGS
+    .Object@LDFLAGS             <- LDFLAGS
+    .Object@LDLIBS              <- LDLIBS
+    .Object@DEFINES             <- DEFINES
+    .Object@IsDebug             <- Debug
+    .Object@DebugState          <- list()
 
     if (!Flat)
     {
       .Object@SourceName  <- addSlash(SourceName)
       .Object@IncludeName <- addSlash(IncludeName)
       .Object@ObjName     <- addSlash(ObjName)
-      .Object@InstallName <- addSlash(InstallName)
     } 
+
+    if (!identical(character(0), InstallLibraryName))
+    {
+      .Object@InstallLibraryName <- addSlash(InstallLibraryName)
+    }
+
+    if (!identical(character(0), InstallIncludeName))
+    {
+      .Object@InstallIncludeName <- addSlash(InstallIncludeName)
+    }
 
     SrcFolder     <- paste(.Object@WorkingFolder, .Object@SourceName, sep="")
     IncludeFolder <- paste(.Object@WorkingFolder, .Object@IncludeName, sep="")
@@ -461,7 +476,7 @@ setMethod("initProjectFromFolder", "BSysCodeProject",
 # -----------------------------------------------------------------------------
 setGeneric("buildMakefile", function(.Object, ...) standardGeneric("buildMakefile"))
 
-setMethod("buildMakefile", "BSysCodeProject",
+setMethod("buildMakefile", "BSysProject",
   function(.Object, Force=FALSE)
   {
     # -------------------------------------------------------------------------
@@ -516,12 +531,22 @@ setMethod("buildMakefile", "BSysCodeProject",
       RootRelativePath    <- ""
       SrcRelativePath     <- ""
       IncludeRelativePath <- ""
-      InstallRelativePath <- ""
 
-      ObjName     <- dropLeadingTrailingSlashes(.Object@ObjName)
-      SourceName  <- dropLeadingTrailingSlashes(.Object@SourceName)
-      IncludeName <- dropLeadingTrailingSlashes(.Object@IncludeName)
-      InstallName <- dropLeadingTrailingSlashes(.Object@InstallName)
+      ObjName             <- dropLeadingTrailingSlashes(.Object@ObjName)
+      SourceName          <- dropLeadingTrailingSlashes(.Object@SourceName)
+      IncludeName         <- dropLeadingTrailingSlashes(.Object@IncludeName)
+      InstallLibraryName  <- NULL
+      InstallIncludeName  <- NULL
+
+      if (!identical(character(0), .Object@InstallLibraryName))
+      {
+        InstallLibraryName <- dropLeadingTrailingSlashes(.Object@InstallLibraryName)
+      }
+
+      if (!identical(character(0), .Object@InstallIncludeName))
+      {
+        InstallIncludeName <- dropLeadingTrailingSlashes(.Object@InstallIncludeName)
+      }
 
       if (nchar(ObjName) != 0)
       {
@@ -583,17 +608,14 @@ setMethod("buildMakefile", "BSysCodeProject",
         SrcRelativePath <- paste(RootRelativePath, SourceName, "/", sep="")
       }
 
+      IncludeRelativePath <- ""
+
       if (nchar(IncludeName) != 0)
       {
         IncludeRelativePath <- paste(RootRelativePath, IncludeName, "/", sep="")
         COMMONFLAGS         <- c(COMMONFLAGS, paste("-I", IncludeRelativePath, sep=""))
       }
 
-      if (nchar(InstallName) != 0)
-      {
-        InstallRelativePath <- paste(RootRelativePath, InstallName, "/", sep="")
-      }
-      
       for (Include in .Object@Includes)
       {
         COMMONFLAGS <- c(COMMONFLAGS, paste("-I", Include, sep=""))
@@ -648,11 +670,35 @@ setMethod("buildMakefile", "BSysCodeProject",
                           MakeRule,
                           "")
         }
-      } 
+      }
 
       MakefileTxt <- c(MakefileTxt,
                        paste("clean : \n\trm ", DlibName, " $(objects)", sep=""),
                        "")
+
+      # if install paths are define then create install rule      
+      if (!is.null(InstallLibraryName) || !is.null(InstallIncludeName))
+      {
+        MakefileTxt <- c(MakefileTxt, "install :")
+      
+        if (!is.null(InstallLibraryName))
+        {
+          InstallLibraryRelativePath <- paste(RootRelativePath, InstallLibraryName, sep="")
+
+          MakefileTxt <- c(MakefileTxt, 
+                           paste("\tcp", DlibName, InstallLibraryRelativePath))
+        }
+
+        if (!is.null(InstallIncludeName))
+        {
+          InstallIncludeRelativePath <- paste(RootRelativePath, InstallIncludeName, sep="")
+
+          MakefileTxt <- c(MakefileTxt, 
+                           paste("\tcp ", IncludeRelativePath, "* ", InstallIncludeRelativePath, sep=""))
+        }
+
+        MakefileTxt <- c(MakefileTxt, "")
+      }
 
       makefile <- file(MakefilePath, "wt")
       writeLines(MakefileTxt, makefile)
@@ -687,7 +733,7 @@ setMethod("buildMakefile", "BSysCodeProject",
 # -----------------------------------------------------------------------------
 setGeneric("make", function(.Object, ...) standardGeneric("make"))
 
-setMethod("make", "BSysCodeProject",
+setMethod("make", "BSysProject",
   function(.Object, Operation="", Debug=NULL)
   {
     runMake <- function(.Object, Operation)
@@ -703,6 +749,10 @@ setMethod("make", "BSysCodeProject",
       if (Operation == "clean")
       {
         operation <- paste("make -C", ObjFolder, "clean | tee", CapturePath)
+      } 
+      else if (Operation == "install")
+      {
+        operation <- paste("make -C", ObjFolder, "install | tee", CapturePath)
       } 
       else if (Operation == "")
       {
@@ -773,7 +823,7 @@ setMethod("make", "BSysCodeProject",
 # -----------------------------------------------------------------------------
 setGeneric("libraryPath", function(.Object, ...) standardGeneric("libraryPath"))
 
-setMethod("libraryPath", "BSysCodeProject",
+setMethod("libraryPath", "BSysProject",
   function(.Object)
   {
     DlibName <- dynlib(.Object@ProjectName)
@@ -797,7 +847,7 @@ setMethod("libraryPath", "BSysCodeProject",
 # -----------------------------------------------------------------------------
 setGeneric("sourcePath", function(.Object, ...) standardGeneric("sourcePath"))
 
-setMethod("sourcePath", "BSysCodeProject",
+setMethod("sourcePath", "BSysProject",
   function(.Object)
   {
     SourcePath <- .Object@WorkingFolder
@@ -817,7 +867,7 @@ setMethod("sourcePath", "BSysCodeProject",
 # -----------------------------------------------------------------------------
 setGeneric("includePath", function(.Object, ...) standardGeneric("includePath"))
 
-setMethod("includePath", "BSysCodeProject",
+setMethod("includePath", "BSysProject",
   function(.Object)
   {
     IncludePath <- .Object@WorkingFolder
@@ -837,7 +887,7 @@ setMethod("includePath", "BSysCodeProject",
 # -----------------------------------------------------------------------------
 setGeneric("objPath", function(.Object, ...) standardGeneric("objPath"))
 
-setMethod("objPath", "BSysCodeProject",
+setMethod("objPath", "BSysProject",
   function(.Object)
   {
     ObjPath <- .Object@WorkingFolder
@@ -853,21 +903,51 @@ setMethod("objPath", "BSysCodeProject",
 
 
 # -----------------------------------------------------------------------------
-# Method to get install path
+# Method to get install library path
 # -----------------------------------------------------------------------------
-setGeneric("installPath", function(.Object, ...) standardGeneric("installPath"))
+setGeneric("installLibraryPath", function(.Object, ...) standardGeneric("installLibraryPath"))
 
-setMethod("installPath", "BSysCodeProject",
+setMethod("installLibraryPath", "BSysProject",
   function(.Object)
   {
-    InstallPath <- .Object@WorkingFolder
+    InstallLibraryPath <- NULL
 
-    if (nchar(.Object@InstallName) != 0)
+    if (!identical(character(0), .Object@InstallLibraryName))
     {
-      InstallPath <- paste(InstallPath, .Object@InstallName, sep="")
+      InstallLibraryPath <- .Object@WorkingFolder
+
+      if (nchar(.Object@InstallLibraryName) != 0)
+      {
+        InstallLibraryPath <- paste(InstallLibraryPath, .Object@InstallLibraryName, sep="")
+      }
     }
 
-    return (InstallPath)
+    return (InstallLibraryPath)
+  }
+)
+
+
+# -----------------------------------------------------------------------------
+# Method to get install include path
+# -----------------------------------------------------------------------------
+setGeneric("installIncludePath", function(.Object, ...) standardGeneric("installIncludePath"))
+
+setMethod("installIncludePath", "BSysProject",
+  function(.Object)
+  {
+    InstallIncludePath <- NULL
+
+    if (!identical(character(0), .Object@InstallIncludeName))
+    {
+      InstallIncludePath <- .Object@WorkingFolder
+
+      if (nchar(.Object@InstallIncludeName) != 0)
+      {
+        InstallIncludePath <- paste(InstallIncludePath, .Object@InstallIncludeName, sep="")
+      }
+    }
+
+    return (InstallIncludePath)
   }
 )
 
@@ -877,7 +957,7 @@ setMethod("installPath", "BSysCodeProject",
 # -----------------------------------------------------------------------------
 setGeneric("loadLibrary", function(.Object, ...) standardGeneric("loadLibrary"))
 
-setMethod("loadLibrary", "BSysCodeProject",
+setMethod("loadLibrary", "BSysProject",
   function(.Object)
   {
     return (dyn.load(libraryPath(.Object)))
@@ -890,7 +970,7 @@ setMethod("loadLibrary", "BSysCodeProject",
 # -----------------------------------------------------------------------------
 setGeneric("unloadLibrary", function(.Object, ...) standardGeneric("unloadLibrary"))
 
-setMethod("unloadLibrary", "BSysCodeProject",
+setMethod("unloadLibrary", "BSysProject",
   function(.Object)
   {
     libPath <- libraryPath(.Object)
@@ -972,7 +1052,7 @@ getLoadedSharedLibraries <- function()
 # -----------------------------------------------------------------------------
 setGeneric("vcDebug", function(.Object, ...) standardGeneric("vcDebug"))
 
-setMethod("vcDebug", "BSysCodeProject",
+setMethod("vcDebug", "BSysProject",
   function(.Object, LaunchEditor=TRUE)
   {
     debugProjectPath <- paste(sourcePath(.Object), .Object@ProjectName, "_DebugProject.RData", sep="")
