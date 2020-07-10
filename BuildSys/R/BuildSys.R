@@ -809,7 +809,7 @@ setMethod("make", "BSysProject",
 
       if (IsWindows)
       {
-        CptureFile <- file(CapturePath, "rt")
+        CaptureFile <- file(CapturePath, "rt")
         writeLines(readLines(CaptureFile))
         close(CaptureFile)
         unlink(CapturePath)
