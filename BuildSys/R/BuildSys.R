@@ -316,7 +316,7 @@ setMethod("initProjectFromFolder", "BSysProject",
             if (!PackageDependency$pkg %in% CodeProject@Packages)
             {
               CodeProject@Packages <- c(CodeProject@Packages, PackageDependency$pkg)
-              IncludePath          <- getPackagePath(PackageDependency$pkg, "/Include")
+              IncludePath          <- getPackagePath(PackageDependency$pkg, "/include")
 
               if (!IncludePath %in% CodeProject@Includes)
               {
@@ -587,6 +587,14 @@ setMethod("buildMakefile", "BSysProject",
         COMMONFLAGS <- c("-O2", "-DNDEBUG")
       }
 
+      LDFLAGS <- c("-shared")
+
+      if (Sys.info()["sysname"] != "Windows")
+      {
+        COMMONFLAGS <- c(COMMONFLAGS, "-fPIC")
+        LDFLAGS     <- c(LDFLAGS, "-fPIC")
+      }
+
       for (Define in .Object@Defines)
       {
         if (nchar(Define) > 0)
@@ -621,7 +629,7 @@ setMethod("buildMakefile", "BSysProject",
         COMMONFLAGS <- c(COMMONFLAGS, paste("-I", Include, sep=""))
       }
 
-      LDFLAGS  <- c("-shared", .Object@LDFLAGS) 
+      LDFLAGS  <- c(LDFLAGS, .Object@LDFLAGS)
       CFLAGS   <- c("$(COMMONFLAGS)", .Object@CFLAGS)
       CXXFLAGS <- c("$(COMMONFLAGS)", "-Wno-ignored-attributes", .Object@CXXFLAGS)
       FFLAGS   <- c("$(COMMONFLAGS)", .Object@FFLAGS)
@@ -738,25 +746,27 @@ setMethod("make", "BSysProject",
   {
     runMake <- function(.Object, Operation)
     {
-      DlibName <- dynlib(.Object@ProjectName)
+      IsWindows <- (Sys.info()["sysname"] == "Windows")
+      DlibName  <- dynlib(.Object@ProjectName)
 
       ObjFolder    <- paste(.Object@WorkingFolder, .Object@ObjName, sep="")
       CapturePath  <- paste(.Object@WorkingFolder, .Object@ProjectName, ".log", sep="")
       ScriptPath   <- paste(.Object@WorkingFolder, .Object@ProjectName, ".sh", sep="")
       FinishedFile <- paste(.Object@WorkingFolder, .Object@ProjectName, ".fin", sep="")
+      CaptureCmd   <- if (IsWindows) paste("| tee", CapturePath) else ""
 
       # run make
       if (Operation == "clean")
       {
-        operation <- paste("make -C", ObjFolder, "clean | tee", CapturePath)
+        operation <- paste("make -C", ObjFolder, "clean", CaptureCmd)
       } 
       else if (Operation == "install")
       {
-        operation <- paste("make -C", ObjFolder, "install | tee", CapturePath)
+        operation <- paste("make -C", ObjFolder, "install", CaptureCmd)
       } 
       else if (Operation == "")
       {
-        operation <- paste("make -C", ObjFolder, "| tee", CapturePath)
+        operation <- paste("make -C", ObjFolder, CaptureCmd)
       }
       else
       {
@@ -776,7 +786,15 @@ setMethod("make", "BSysProject",
       unlink(FinishedFile)
 
       unloadLibrary(.Object)
-      system(command.line, wait=FALSE, invisible=FALSE, intern=FALSE)
+
+      if (Sys.info()["sysname"] == "Windows")
+      {
+        system(command.line, wait=FALSE, invisible=FALSE)
+      }
+      else
+      {
+        system(command.line, wait=TRUE)
+      }
 
       # test for completion of script. We do this rather than using
       # wait=TRUE in system call so that we can make a visible shell that 
@@ -789,10 +807,13 @@ setMethod("make", "BSysProject",
 
       unlink(FinishedFile)
 
-      CaptureFile <- file(CapturePath, "rt")
-      writeLines(readLines(CaptureFile))
-      close(CaptureFile)
-      unlink(CapturePath)
+      if (IsWindows)
+      {
+        CptureFile <- file(CapturePath, "rt")
+        writeLines(readLines(CaptureFile))
+        close(CaptureFile)
+        unlink(CapturePath)
+      }
     }
 
     # if Debug provided and different from current update 
@@ -1174,6 +1195,7 @@ setMethod("vcDebug", "BSysProject",
       working.dir <- getwd()
 
       Rprofile_lines <- c(
+      paste("require(BuildSys)", sep=""),
       paste("setwd(\"", working.dir, "\")", sep=""),
       paste("load(\"", debugSessionPath, "\")", sep=""),
       paste("load(\"", debugProjectPath, "\")", sep=""),
