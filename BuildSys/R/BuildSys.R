@@ -11,24 +11,9 @@
 
 dynlib <- function(BaseName)
 {
-  SysName <- Sys.info()["sysname"]
+  LibName <- paste(BaseName, .Platform$dynlib.ext, sep="")
 
-  if (SysName == "Windows")
-  {
-    LibName <- paste(BaseName, ".dll", sep="")
-  }
-  else if (SysName == "Linux")
-  {
-    LibName <- paste(BaseName, ".so", sep="")
-  }
-  else if (SysName == "Darwin")
-  {
-    LibName <- paste(BaseName, ".dylib", sep="")
-  }
-  else
-  {
-    stop("Unsupported OS")
-  }
+  return (dynlib)
 }
 
 
@@ -484,7 +469,7 @@ setMethod("buildMakefile", "BSysProject",
     # -------------------------------------------------------------------------
     idStamp <- function()
     {
-      MakeID  <- digest(.Object, algo="md5")
+      MakeID  <- digest::digest(.Object, algo="md5")
       IdStamp <- paste("# MakeID:", MakeID, "--Do not edit this line")
 
       return (IdStamp)

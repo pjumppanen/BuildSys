@@ -1,4 +1,3 @@
-importFrom("digest", "digest")
 export("initProjectFromFolder", 
        "buildMakefile",
        "make", 
@@ -11,5 +10,5 @@ export("initProjectFromFolder",
        "loadLibrary", 
        "unloadLibrary",
        "vcDebug")
-exportClasses("BSysSourceFile", 
-              "BSysProject")
+ exportClasses("BSysSourceFile", 
+               "BSysProject")
