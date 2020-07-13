@@ -13,7 +13,7 @@ dynlib <- function(BaseName)
 {
   LibName <- paste(BaseName, .Platform$dynlib.ext, sep="")
 
-  return (dynlib)
+  return (LibName)
 }
 
 
@@ -1061,12 +1061,33 @@ setGeneric("vcDebug", function(.Object, ...) standardGeneric("vcDebug"))
 setMethod("vcDebug", "BSysProject",
   function(.Object, LaunchEditor=TRUE)
   {
-    debugProjectPath <- paste(sourcePath(.Object), .Object@ProjectName, "_DebugProject.RData", sep="")
-    debugSessionPath <- paste(sourcePath(.Object), .Object@ProjectName, "_DebugSession.RData", sep="")
-    Rprofile.path    <- paste(sourcePath(.Object), .Object@ProjectName, "_DebugRprofile.txt", sep="")
+    RprofileFolder   <- paste(sourcePath(.Object), .Object@ProjectName, ".Rprof", sep="")
+    debugProjectPath <- paste(RprofileFolder, "/", .Object@ProjectName, "_DebugProject.RData", sep="")
+    debugSessionPath <- paste(RprofileFolder, "/", .Object@ProjectName, "_DebugSession.RData", sep="")
+    Rprofile.path    <- paste(RprofileFolder, "/.Rprofile", sep="")
 
     if (LaunchEditor)
     {
+      architecture <- function()
+      {
+        Architecture <- Sys.info()[["machine"]]
+        Architecture <- gsub("x86-64", "x86_64", Architecture)
+
+        return (Architecture)
+      }
+
+      # create Rprofile folder
+      file.attr    <- file.info(RprofileFolder)
+      
+      if (is.na(file.attr$size))
+      {
+        dir.create(RprofileFolder)
+      }
+      else if (!file.attr$isdir)
+      {
+        stop(paste("Cannot create", RprofileFolder, "folder as .vscode file exists."))
+      }
+
       # create .vscode folder if needed
       vsCodeFolder <- paste(sourcePath(.Object), ".vscode", sep="")
       file.attr    <- file.info(vsCodeFolder)
@@ -1081,16 +1102,18 @@ setMethod("vcDebug", "BSysProject",
         stop("Cannot create .vscode folder as .vscode file exists.")
       }
 
-      debug.app <- "gdb"
+      debug.app        <- "gdb"
+      external.console <- "true"
+      R.args           <- "\"--no-save\", \"--no-restore\""
 
       # get needed paths
       if (IsDarwin)
       {
-        R.path <- "/Applications/R.app/Contents/MacOS/R"
+        R.path <- "/Applications/R.app/Contents/MacOS/R"        
 
         if (!file.exists(R.path))
         {
-          stop(paste("Cannot find R.app. We have assumed it is installed at", R.path))
+          stop("Cannot find R.")
         }
         
         gdb.path  <- "/Applications/Xcode.app/Contents/Developer/usr/bin/lldb-mi"
@@ -1100,6 +1123,9 @@ setMethod("vcDebug", "BSysProject",
         {
           stop("Cannot find lldb-mi. Ensure Xcode is installed.")
         }
+
+        external.console <- "false"
+        R.args           <- paste("\"", RprofileFolder, "\"", sep="")
       }
       else
       {
@@ -1200,13 +1226,13 @@ setMethod("vcDebug", "BSysProject",
       paste("      \"name\": \"(", debug.app, ") Launch\",", sep=""),
       "      \"type\": \"cppdbg\",",
       "      \"request\": \"launch\",",
-      "      \"targetArchitecture\":\"x86_64\",",
+      paste("      \"targetArchitecture\":\"", architecture(),"\",", sep=""),
       paste("      \"program\": \"", R.path, "\",", sep=""),
-      "      \"args\": [\"--no-save\", \"--no-restore\"],",
+      paste("      \"args\": [", R.args, "],", sep=""),
       "      \"stopAtEntry\": false,",
-      paste("      \"cwd\": \"", working.dir, "\",", sep=""),
-      paste("      \"environment\": [{\"name\":\"R_PROFILE_USER\",\"value\":\"",Rprofile.path,"\"}, {\"name\":\"R_HOME\",\"value\":\"",R.home(),"\"}],", sep=""),
-      paste("      \"externalConsole\": ", if (IsDarwin) "false" else "true",",", sep=""),
+      paste("      \"cwd\": \"", RprofileFolder, "\",", sep=""),
+      paste("      \"environment\": [{\"name\":\"R_HOME\",\"value\":\"",R.home(),"\"}],", sep=""),
+      paste("      \"externalConsole\": ", external.console, ",", sep=""),
       paste("      \"MIMode\": \"", debug.app, "\",", sep=""),
       paste("      \"miDebuggerPath\": \"", gdb.path, "\",", sep=""),
       "      \"setupCommands\": [",
