@@ -1,62 +1,40 @@
 \name{unloadLibrary}
 \alias{unloadLibrary}
+\alias{\S4method{unloadLibrary}{BSysProject}}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Unload the shared library
+Unload the Built Shared Library
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Calling \code{unloadLibrary} will unload the built library of the project specification in the S4 \code{BSysProject} object instance
+from the R session.
 }
 \usage{
-unloadLibrary(Object)
+  \S4method{unloadLibrary}{BSysProject}(.Object)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{Object}{
-%%     ~~Describe \code{Object} here~~
-}
-}
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
-\value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
-\references{
-%% ~put references to the literature/web site here ~
-}
-\author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-}
-\examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (Object) 
-{
+  \item{.Object}{
+    \code{.Object} is an object instance of class \code{BSysProject} that describes the code project.
   }
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory (show via RShowDoc("KEYWORDS")):
-% \keyword{ ~kwd1 }
-% \keyword{ ~kwd2 }
-% Use only one keyword per line.
-% For non-standard keywords, use \concept instead of \keyword:
-% \concept{ ~cpt1 }
-% \concept{ ~cpt2 }
-% Use only one concept per line.
+\details{
+  Internally this method delagates to \code{dyn.unload}. Refer to the doucmentation of \code{\link{dyn.unload}} for further details.
+}
+\value{
+  this method has no return value.
+}
+\author{
+  \packageAuthor{BuildSys}
+
+  Maintainer: \packageMaintainer{BuildSys}
+}
+\seealso{
+  \code{\link{loadLibrary}}
+  \code{\link{dyn.unload}}
+}
+\examples{
+}
+
+\keyword{debugging}
+\keyword{programming}
+\keyword{utilities}

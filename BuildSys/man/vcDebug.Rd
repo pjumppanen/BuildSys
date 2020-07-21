@@ -1,62 +1,61 @@
 \name{vcDebug}
 \alias{vcDebug}
+\alias{\S4method{vcDebug}{BSysProject}}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Debug the shared library
+  Debug the Shared Library
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+  Calling \code{vcDebug} will initiate a debug enabled \emph{Microsoft Visual Code} instance
+  that can be use as a GUI debugger of your C/C++ code.
 }
 \usage{
-vcDebug(Object)
+  \S4method{vcDebug}{BSysProject}(.Object, LaunchEditor=TRUE)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{Object}{
-%%     ~~Describe \code{Object} here~~
-}
-}
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
-\value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
-\references{
-%% ~put references to the literature/web site here ~
-}
-\author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-}
-\examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (Object) 
-{
+  \item{.Object}{
+    \code{BSysProject} object instance defining the library to be debugged. See \code{\link{BuildSys-package}} for more information.
+  }
+  \item{LaunchEditor}{
+    \code{LaunchEditor} is a reserved argument that should not be used by the user. A call to it with \code{LaunchEditor=FALSE} is used 
+    in the \emph{.Rprofile} file for the debug R session to do the necessary tasks to initialise the R session state.
   }
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory (show via RShowDoc("KEYWORDS")):
-% \keyword{ ~kwd1 }
-% \keyword{ ~kwd2 }
-% Use only one keyword per line.
-% For non-standard keywords, use \concept instead of \keyword:
-% \concept{ ~cpt1 }
-% \concept{ ~cpt2 }
-% Use only one concept per line.
+\details{
+  \code{vcDebug} creates the necessary \code{c_cpp_properties.json} and \code{launch.json} files needed for \emph{Microsoft Visual Code}
+  to effectively debug the project dynamic library and launches an instance of \emph{Visual Code}. It is assumed that the dynamic
+  library has already been compiled with \code{\link{make}} and \code{Debug} support enabled. R needs to be configured to be able to build
+  C/C++ libraries (RTools installed on Windows) and it is assumed that \emph{Microsoft Visual Code} is installed. These requirements
+  are discussed at length in \code{\link{BuildSys-package}}.
+
+  Within \emph{Visual Code} you can open the source file/s of your library, set breakpoints and run a debug session. To run a debug
+  session select the \emph{run/Start Debugging} menu item. Doing so will result in a new instance of \emph{R} being launched which contains
+  the same environment (including loaded packages and loaded dynamic libraries) as the parent \emph{R} session where \code{vcDebug} was first
+  called. This \emph{R} session is your \emph{sandbox} to safely debug your library in and leaves the parent \emph{R} session safe from loss should
+  your code crash \emph{R} completely.
+
+  Typically when debugging a new library the library requires \emph{R} setup code to initialise as a basis for running some for of library testing.
+  With \code{BuildSys} you should perform this initial setup of \emph{R} in the parent \emph{R} session before calling \code{vcDebug} so that you
+  never have to initialise \emph{R} in your debug session. Its correct state will have been initialised from the parent \emph{R} session.
+}
+\value{
+  this method returns no value.
+}
+\author{
+  \packageAuthor{BuildSys}
+
+  Maintainer: \packageMaintainer{BuildSys}
+}
+
+\seealso{
+  \code{\link{initProjectFromFolder}}
+  \code{\link{make}}
+  \code{\link{BuildSys-package}}
+}
+
+\examples{
+}
+
+\keyword{debugging}
+\keyword{programming}
+\keyword{utilities}

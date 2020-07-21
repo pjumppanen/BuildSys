@@ -1,126 +1,149 @@
 \name{initProjectFromFolder}
 \alias{initProjectFromFolder}
+\alias{\S4method{initProjectFromFolder}{BSysProject}}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Initialise a \code{BSysCodeProject} instance based on a project folder
+  Initialise an S4 \code{BSysProject} Instance based on a Project Folder
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+  Calling \code{initProjectFromFile} initialises a project specification in an S4 \code{BSysProject} object instance. That
+  object instance can then be used to compile and debug the resulting shared library. A new \code{BSysProject} object instance
+  can be constructed by calling \code{new("BSysProject", ...)} where the argument list (...) is the same as for \code{initProjectFromFile}.
 }
+
 \usage{
-initProjectFromFolder(Object, Name = "", WorkingFolder = "", SourceName = "src", IncludeName = "include", ObjName = "obj", InstallName = "obj", Flat = TRUE, Packages = as.character(c()), Includes = as.character(c()), Defines = as.character(c()), Libraries = as.character(c()), CFLAGS = as.character(c()), CXXFLAGS = as.character(c()), FFLAGS = as.character(c()), LDFLAGS = as.character(c()), LDLIBS = as.character(c()), DEFINES = as.character(c()), Debug = TRUE)
+\S4method{initProjectFromFolder}{BSysProject}(.Object,
+                      Name = "",
+                      WorkingFolder = "",
+                      SourceName = "src",
+                      IncludeName = "include",
+                      ObjName = "obj",
+                      InstallLibraryName = as.character(NULL),
+                      InstallIncludeName = as.character(NULL),
+                      Flat = TRUE,
+                      Packages = as.character(c()),
+                      Includes = as.character(c()),
+                      Defines = as.character(c()),
+                      Libraries = as.character(c()),
+                      CFLAGS = as.character(c()),
+                      CXXFLAGS = as.character(c()),
+                      FFLAGS = as.character(c()),
+                      LDFLAGS = as.character(c()),
+                      LDLIBS = as.character(c()),
+                      DEFINES = as.character(c()),
+                      Debug = TRUE)
 }
-%- maybe also 'usage' for other objects documented here.
+
 \arguments{
-  \item{Object}{
-%%     ~~Describe \code{Object} here~~
+  \item{.Object}{
+\code{.Object} is an S4 object instance of class \code{BSysProject} that the code project will be based off.
 }
   \item{Name}{
-%%     ~~Describe \code{Name} here~~
+The name given to the project and will form the basename of the shared library.
 }
   \item{WorkingFolder}{
-%%     ~~Describe \code{WorkingFolder} here~~
+The path to the root folder of the project, either relative or absolute.
 }
   \item{SourceName}{
-%%     ~~Describe \code{SourceName} here~~
+The sub-path / sub-drectory of the source folder (containing \code{.c}, \code{.cpp} files) in the project.
 }
   \item{IncludeName}{
-%%     ~~Describe \code{IncludeName} here~~
+The sub-path / sub-drectory of the include folder (containing \code{.h}, \code{.hpp} files) in the project.
 }
   \item{ObjName}{
-%%     ~~Describe \code{ObjName} here~~
+The sub-path / sub-drectory of the object folder (containing the compiled \code{.o} files) in the project.
 }
   \item{InstallLibraryName}{
-%%     ~~Describe \code{InstallName} here~~
+The sub-path / sub-drectory of the folder to install the compiled shared library to.
 }
   \item{InstallIncludeName}{
-%%     ~~Describe \code{InstallName} here~~
+The sub-path / sub-drectory of the folder to install the shared library header files to.
 }
   \item{Flat}{
-%%     ~~Describe \code{Flat} here~~
+A \code{Boolean} determining if the project is assumed \emph{flat} or \emph{heirarchical}. If \emph{flat}
+then all the source and include files are assumed to reside in the \code{WorkingFolder}, otherwise they
+are assumed to be in the sub-folders descibed by the \code{SourceName}, \code{IncludeName} and \code{ObjName}
+arguments.
 }
   \item{Packages}{
-%%     ~~Describe \code{Packages} here~~
+A \code{string list} that names the packages that this library is depenedent on (C/C++ include dependencies)
 }
   \item{Includes}{
-%%     ~~Describe \code{Includes} here~~
+A \code{string list} that contains the include paths of external dependencies of the library code
 }
   \item{Defines}{
-%%     ~~Describe \code{Defines} here~~
+A \code{string list} that contains preprocessor (\emph{#defines}) defines required to compile the code
 }
   \item{Libraries}{
-%%     ~~Describe \code{Libraries} here~~
+A \code{string list} that names the additional library dependencies needed to link the library. The format is as required
+by \emph{gcc}. For instance, \code{"-L/usr/local/lib -lexpat"} would constitute a single item in the list.
 }
   \item{CFLAGS}{
-%%     ~~Describe \code{CFLAGS} here~~
+A \code{string list} naming additional \emph{gcc} flags to apply when compiling \code{.c} files
 }
   \item{CXXFLAGS}{
-%%     ~~Describe \code{CXXFLAGS} here~~
+A \code{string list} naming additional \emph{gcc} flags to apply when compiling \code{.cpp} files
 }
   \item{FFLAGS}{
-%%     ~~Describe \code{FFLAGS} here~~
+A \code{string list} naming additional \emph{gcc} flags to apply when compiling \code{.f} files
 }
   \item{LDFLAGS}{
-%%     ~~Describe \code{LDFLAGS} here~~
+A \code{string list} naming additional \emph{gcc} flags to apply when linking \code{.o} files
 }
   \item{LDLIBS}{
-%%     ~~Describe \code{LDLIBS} here~~
+A \code{string list} naming additional \emph{gcc} linker flags to apply when linking \code{.o} files
 }
   \item{DEFINES}{
-%%     ~~Describe \code{DEFINES} here~~
+A \code{string list} that contains preprocessor (\emph{#defines}) defines supplied when compiling the code
 }
   \item{Debug}{
-%%     ~~Describe \code{Debug} here~~
+A \code{Boolean} that indicates whether to create a debug build
 }
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
+\code{initProjectFromFolder} constructs a project specification by scanning the \code{WorkingFolder}
+and relevant \code{sourceName} sub path for source files to add to the project. Any \code{.c}, \code{.cpp}
+and \code{.f} files it finds are added to the project. Any added files are scanned for include directives
+and those includes are added as project dependencies. If the dependency is not found in the path described
+by the \code{includeName} it is regarded as an external dependency.
+
+If the external dependency is known (\code{TMB.hpp} for example) then the appropriate \code{Includes},
+\code{Defines} and \code{Libraries} are added to the project definition. \code{BuildSys} is currently
+aware of \code{TMB}, \code{Rcpp}, \code{RcppEigen} and the \code{BLAS} library support in R. External
+dependencies not know to \code{BuildSys} need to be handle by adding the appropriate \code{Includes},
+\code{Defines} and \code{Libraries} to the Project manually with the arguments provided above.
+
+\code{initProjectFromFolder} has useful defaults meaning in most cases very few arguments need be provided.
+At most, the \code{WorkingFolder} and \code{Name} arguments will be required but if the project has only
+a single source file then even \code{Name} can be omitted as the name will be inferred from the source file name.
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
-\references{
-%% ~put references to the literature/web site here ~
-}
-\author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
+returns an S4 object instance of class \code{BSysProject} that describes the code project.
 }
 
-%% ~Make other sections like Warning with \section{Warning }{....} ~
+\author{
+\packageAuthor{BuildSys}
+
+Maintainer: \packageMaintainer{BuildSys}
+}
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+\code{\link{make}}
+\code{\link{buildMakefile}}
+\code{\link{vcDebug}}
+\code{\link{loadLibrary}}
+\code{\link{unloadLibrary}}
+\code{\link{libraryPath}}
+\code{\link{sourcePath}}
+\code{\link{includePath}}
+\code{\link{objPath}}
+\code{\link{installLibraryPath}}
+\code{\link{installIncludePath}}
+\code{\link{BuildSys-package}}
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (Object, Name = "", WorkingFolder = "", SourceName = "src", 
-    IncludeName = "include", ObjName = "obj", InstallName = "obj", 
-    Flat = TRUE, Packages = as.character(c()), Includes = as.character(c()), 
-    Defines = as.character(c()), Libraries = as.character(c()), 
-    CFLAGS = as.character(c()), CXXFLAGS = as.character(c()), 
-    FFLAGS = as.character(c()), LDFLAGS = as.character(c()), 
-    LDLIBS = as.character(c()), DEFINES = as.character(c()), 
-    Debug = TRUE) 
-buildMakefile <- function(Object, Force = FALSE) {
-  }
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory (show via RShowDoc("KEYWORDS")):
-% \keyword{ ~kwd1 }
-% \keyword{ ~kwd2 }
-% Use only one keyword per line.
-% For non-standard keywords, use \concept instead of \keyword:
-% \concept{ ~cpt1 }
-% \concept{ ~cpt2 }
-% Use only one concept per line.
+
+\keyword{debugging}
+\keyword{programming}
+\keyword{utilities}

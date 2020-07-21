@@ -1,62 +1,42 @@
 \name{objPath}
 \alias{objPath}
+\alias{\S4method{objPath}{BSysProject}}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Get the path to the built shared library
+  Get the Path to the Project Object Files
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+  Calling \code{objPath} will return the fully qualified path to the object
+  file folder of the project specification in the S4 \code{BSysProject} object instance.
+  The object file folder will contain the makefile and compiled (object) \code{.o} files as
+  well as the linked shared library.
 }
 \usage{
-objPath(Object)
+  \S4method{objPath}{BSysProject}(.Object)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{Object}{
-%%     ~~Describe \code{Object} here~~
-}
-}
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
-\value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
-\references{
-%% ~put references to the literature/web site here ~
-}
-\author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-}
-\examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (Object) 
-{
+  \item{.Object}{
+    \code{.Object} is an object instance of class \code{BSysProject} that describes the code project.
   }
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory (show via RShowDoc("KEYWORDS")):
-% \keyword{ ~kwd1 }
-% \keyword{ ~kwd2 }
-% Use only one keyword per line.
-% For non-standard keywords, use \concept instead of \keyword:
-% \concept{ ~cpt1 }
-% \concept{ ~cpt2 }
-% Use only one concept per line.
+\value{
+  returns the fully qualified path to the object file folder of the project specification.
+}
+\author{
+  \packageAuthor{BuildSys}
+
+  Maintainer: \packageMaintainer{BuildSys}
+}
+\seealso{
+  \code{\link{libraryPath}}
+  \code{\link{sourcePath}}
+  \code{\link{includePath}}
+  \code{\link{installLibraryPath}}
+  \code{\link{installIncludePath}}
+}
+\examples{
+}
+
+\keyword{debugging}
+\keyword{programming}
+\keyword{utilities}
