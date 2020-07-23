@@ -31,8 +31,13 @@
   \code{\link{installLibraryPath}}
   \code{\link{installIncludePath}}
 }
-%-\examples{
-%-}
+\note{
+  see \code{\link{BuildSys-package}} example code for creation of \code{Project} in example below.
+}
+\examples{
+  # display project library path
+  libraryPath(Project)
+}
 
 \keyword{debugging}
 \keyword{programming}

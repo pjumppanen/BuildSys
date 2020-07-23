@@ -31,8 +31,13 @@
   \code{\link{unloadLibrary}}
   \code{\link{dyn.load}}
 }
-%-\examples{
-%-}
+\note{
+  see \code{\link{BuildSys-package}} example code for creation of \code{Project} in example below.
+}
+\examples{
+  # load the shared library
+  loadLibrary(Project)
+}
 
 \keyword{debugging}
 \keyword{programming}

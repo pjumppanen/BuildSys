@@ -52,8 +52,20 @@
   \code{\link{BuildSys-package}}
 }
 
-%-\examples{
-%-}
+\note{
+  see \code{\link{BuildSys-package}} example code for creation of \code{Project} in example below.
+}
+\examples{
+  # open a debug session - assumes Visual Studio Code is installed as directed in the 
+  # package documentation. This will open a Visual Studio Code session. In that session
+  # open the convolve.c source file and set breakpoints, then select the "run/start debugging"
+  # menu to debug. This will start a new R session with the same state as the parent 
+  # R session where vcDebug() is first called. In the new debug session run the following
+  # command:
+  #
+  # conv(a, b)
+  vcDebug(Project)
+}
 
 \keyword{debugging}
 \keyword{programming}

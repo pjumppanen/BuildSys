@@ -269,8 +269,71 @@ Maintainer: \packageMaintainer{BuildSys}
 \code{\link{installIncludePath}}
 }
 
-%-\examples{
-%-}
+\examples{
+# Create source file for finite convolution example in "Writing R Extensions"  
+lines <- c(
+"#include <R.h>",
+"#include <Rinternals.h>",
+"",
+"SEXP convolve2(SEXP a, SEXP b)",
+"{",
+"    int na, nb, nab;",
+"    double *xa, *xb, *xab;",
+"    SEXP ab;",
+"",
+"    a = PROTECT(coerceVector(a, REALSXP));",
+"    b = PROTECT(coerceVector(b, REALSXP));",
+"    na = length(a); nb = length(b); nab = na + nb - 1;",
+"    ab = PROTECT(allocVector(REALSXP, nab));",
+"    xa = REAL(a); xb = REAL(b); xab = REAL(ab);",
+"    for(int i = 0; i < nab; i++) xab[i] = 0.0;",
+"    for(int i = 0; i < na; i++)",
+"        for(int j = 0; j < nb; j++) xab[i + j] += xa[i] * xb[j];",
+"    UNPROTECT(3);",
+"    return ab;",
+"}")  
+
+writeLines(lines, "convolve.c")
+
+# digest need not be loaded but the digest package needs to be installed
+# as it is used to create a digest of the project to track the need for
+# makefile re-creation.
+require(digest)
+
+require(BuildSys)
+
+# create project to build shared library, a flat project with source in current working directory. 
+Project <- new("BSysProject")
+
+# build the shared library
+Project <- make(Project)
+
+# show library path
+libraryPath(Project)
+
+# load the library
+loadLibrary(Project)
+
+# R wrapper on .Call
+conv <- function(a, b) .Call("convolve2", a, b)
+
+# Test data
+a <- rnorm(100)
+b <- rep(1.0, times=10)
+
+# call the shared library function
+conv(a, b)
+
+# open a debug session - assumes Visual Studio Code is installed as directed in the 
+# package documentation. This will open a Visual Studio Code session. In that session
+# open the convolve.c source file and set breakpoints, then select the "run/start debugging"
+# menu to debug. This will start a new R session with the same state as the parent 
+# R session where vcDebug() is first called. In the new debug session run the following
+# command:
+#
+# conv(a, b)
+vcDebug(Project)
+}
 
 \keyword{package}
 \keyword{debugging}

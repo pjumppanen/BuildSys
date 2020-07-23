@@ -33,8 +33,13 @@
   \code{\link{objPath}}
   \code{\link{installLibraryPath}}
 }
-%-\examples{
-%-}
+\note{
+  see \code{\link{BuildSys-package}} example code for creation of \code{Project} in example below.
+}
+\examples{
+  # display project install include path
+  installIncludePath(Project)
+}
 
 \keyword{debugging}
 \keyword{programming}

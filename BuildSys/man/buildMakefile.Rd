@@ -26,7 +26,7 @@
   and the digest stored in the header comment line of the makefile.
 }
 \value{
-  There is no return value for this method.
+  Returns \code{TRUE} if the makefile is created or re-created and \code{FALSE} otherwise.
 }
 \author{
   \packageAuthor{BuildSys}
@@ -39,8 +39,14 @@
   \code{\link{initProjectFromFolder}}
   \code{\link{BuildSys-package}}
 }
-%-\examples{
-%-}
+
+\note{
+  see \code{\link{BuildSys-package}} example code for creation of \code{Project} in example below.
+}
+\examples{
+  # build makefile
+  buildMakefile(Project)
+}
 
 \keyword{debugging}
 \keyword{programming}

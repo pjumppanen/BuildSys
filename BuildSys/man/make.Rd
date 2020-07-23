@@ -50,8 +50,16 @@
   \code{\link{initProjectFromFolder}}
   \code{\link{BuildSys-package}}
 }
-%-\examples{
-%-}
+\note{
+  see \code{\link{BuildSys-package}} example code for creation of \code{Project} in example below.
+}
+\examples{
+  # clean the shared library
+  make(Project, "clean")
+
+  # make the shared library
+  make(Project)
+}
 
 \keyword{debugging}
 \keyword{programming}
