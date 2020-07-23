@@ -1,7 +1,6 @@
 \name{libraryPath}
 \alias{libraryPath}
 \alias{\S4method{libraryPath}{BSysProject}}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
   Get the Path to the Built Shared Library
 }
@@ -32,8 +31,8 @@
   \code{\link{installLibraryPath}}
   \code{\link{installIncludePath}}
 }
-\examples{
-}
+%-\examples{
+%-}
 
 \keyword{debugging}
 \keyword{programming}

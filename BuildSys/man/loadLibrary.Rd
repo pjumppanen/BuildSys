@@ -1,7 +1,6 @@
 \name{loadLibrary}
 \alias{loadLibrary}
 \alias{\S4method{loadLibrary}{BSysProject}}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
   Load the Built Shared Library
 }
@@ -32,8 +31,8 @@
   \code{\link{unloadLibrary}}
   \code{\link{dyn.load}}
 }
-\examples{
-}
+%-\examples{
+%-}
 
 \keyword{debugging}
 \keyword{programming}

@@ -269,8 +269,8 @@ Maintainer: \packageMaintainer{BuildSys}
 \code{\link{installIncludePath}}
 }
 
-\examples{
-}
+%-\examples{
+%-}
 
 \keyword{package}
 \keyword{debugging}

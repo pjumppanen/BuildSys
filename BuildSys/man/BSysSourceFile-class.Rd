@@ -18,7 +18,7 @@ corresponding dependecies that make up a \code{BSysProject}.
     \item{\code{Filename}:}{Object of class \code{"character"} is the file name and path of a file in a \code{BSysProject} object instance. }
     \item{\code{Type}:}{Object of class \code{"character"} is a string naming the source file type (\code{"c"}, \code{"cpp"} or \code{"f"}). }
     \item{\code{Dependencies}:}{Object of class \code{"list"} is a list of fully qualified include file dependencies for this source file. }
-    \item{\code{Externals}:}{Object of class \code{"list"} is a list of external include file dependencies (the file is not in the \code{\link{includePath)}}. }
+    \item{\code{Externals}:}{Object of class \code{"list"} is a list of external include file dependencies (the file is not in the \code{\link{includePath}}. }
   }
 }
 \section{Methods}{

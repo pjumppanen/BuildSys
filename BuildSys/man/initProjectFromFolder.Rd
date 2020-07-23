@@ -1,7 +1,6 @@
 \name{initProjectFromFolder}
 \alias{initProjectFromFolder}
 \alias{\S4method{initProjectFromFolder}{BSysProject}}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
   Initialise an S4 \code{BSysProject} Instance based on a Project Folder
 }
@@ -141,8 +140,8 @@ Maintainer: \packageMaintainer{BuildSys}
 \code{\link{installIncludePath}}
 \code{\link{BuildSys-package}}
 }
-\examples{
-}
+%-\examples{
+%-}
 
 \keyword{debugging}
 \keyword{programming}

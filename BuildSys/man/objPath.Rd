@@ -1,7 +1,6 @@
 \name{objPath}
 \alias{objPath}
 \alias{\S4method{objPath}{BSysProject}}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
   Get the Path to the Project Object Files
 }
@@ -34,8 +33,8 @@
   \code{\link{installLibraryPath}}
   \code{\link{installIncludePath}}
 }
-\examples{
-}
+%-\examples{
+%-}
 
 \keyword{debugging}
 \keyword{programming}

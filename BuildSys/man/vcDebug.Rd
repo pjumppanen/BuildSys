@@ -1,7 +1,6 @@
 \name{vcDebug}
 \alias{vcDebug}
 \alias{\S4method{vcDebug}{BSysProject}}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
   Debug the Shared Library
 }
@@ -53,8 +52,8 @@
   \code{\link{BuildSys-package}}
 }
 
-\examples{
-}
+%-\examples{
+%-}
 
 \keyword{debugging}
 \keyword{programming}

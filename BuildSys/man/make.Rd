@@ -1,7 +1,6 @@
 \name{make}
 \alias{make}
 \alias{\S4method{make}{BSysProject}}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
   Make the Shared Library
 }
@@ -51,8 +50,8 @@
   \code{\link{initProjectFromFolder}}
   \code{\link{BuildSys-package}}
 }
-\examples{
-}
+%-\examples{
+%-}
 
 \keyword{debugging}
 \keyword{programming}

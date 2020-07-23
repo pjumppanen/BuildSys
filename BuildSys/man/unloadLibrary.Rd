@@ -1,7 +1,6 @@
 \name{unloadLibrary}
 \alias{unloadLibrary}
 \alias{\S4method{unloadLibrary}{BSysProject}}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Unload the Built Shared Library
 }
@@ -32,8 +31,8 @@ from the R session.
   \code{\link{loadLibrary}}
   \code{\link{dyn.unload}}
 }
-\examples{
-}
+%-\examples{
+%-}
 
 \keyword{debugging}
 \keyword{programming}

@@ -1,7 +1,6 @@
 \name{buildMakefile}
 \alias{buildMakefile}
 \alias{\S4method{buildMakefile}{BSysProject}}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
   Build a GNU makefile
 }
@@ -40,8 +39,8 @@
   \code{\link{initProjectFromFolder}}
   \code{\link{BuildSys-package}}
 }
-\examples{
-}
+%-\examples{
+%-}
 
 \keyword{debugging}
 \keyword{programming}

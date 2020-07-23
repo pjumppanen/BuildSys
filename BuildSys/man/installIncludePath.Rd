@@ -1,7 +1,6 @@
 \name{installIncludePath}
 \alias{installIncludePath}
 \alias{\S4method{installIncludePath}{BSysProject}}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
   Get the Install Path for the Project Include Files
 }
@@ -34,8 +33,8 @@
   \code{\link{objPath}}
   \code{\link{installLibraryPath}}
 }
-\examples{
-}
+%-\examples{
+%-}
 
 \keyword{debugging}
 \keyword{programming}
