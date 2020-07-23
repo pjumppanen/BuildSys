@@ -6,9 +6,9 @@
   Initialise an S4 \code{BSysProject} Instance based on a Project Folder
 }
 \description{
-  Calling \code{initProjectFromFile} initialises a project specification in an S4 \code{BSysProject} object instance. That
+  Calling \code{initProjectFromFolder} initialises a project specification in an S4 \code{BSysProject} object instance. That
   object instance can then be used to compile and debug the resulting shared library. A new \code{BSysProject} object instance
-  can be constructed by calling \code{new("BSysProject", ...)} where the argument list (...) is the same as for \code{initProjectFromFile}.
+  can be constructed by calling \code{new("BSysProject", ...)} where the argument list (...) is the same as for \code{initProjectFromFolder}.
 }
 
 \usage{
