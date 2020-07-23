@@ -298,18 +298,34 @@ writeLines(lines, "convolve.c")
 # digest need not be loaded but the digest package needs to be installed
 # as it is used to create a digest of the project to track the need for
 # makefile re-creation.
-require(digest)
-
 require(BuildSys)
 
 # create project to build shared library, a flat project with source in current working directory. 
 Project <- new("BSysProject")
 
+# re-initialise project from current working directory, new("BSysProject") calls this internally
+Project <- initProjectFromFolder(Project)
+
 # build the shared library
 Project <- make(Project)
 
-# show library path
+# get project library path
 libraryPath(Project)
+
+# get project source path
+sourcePath(Project)
+
+# get project include path
+includePath(Project)
+
+# get project object path
+objPath(Project)
+
+# get project install library path
+installLibraryPath(Project)
+
+# get project install include path
+installIncludePath(Project)
 
 # load the library
 loadLibrary(Project)
@@ -333,6 +349,9 @@ conv(a, b)
 #
 # conv(a, b)
 vcDebug(Project)
+
+# unload the shared library
+unloadLibrary(Project)
 }
 
 \keyword{package}

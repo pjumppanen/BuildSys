@@ -32,11 +32,7 @@
   \code{\link{installIncludePath}}
 }
 \note{
-  see \code{\link{BuildSys-package}} example code for creation of \code{Project} in example below.
-}
-\examples{
-  # display project library path
-  libraryPath(Project)
+  see \code{\link{BuildSys-package}} for examples of use.
 }
 
 \keyword{debugging}

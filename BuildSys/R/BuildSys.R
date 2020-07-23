@@ -1337,7 +1337,12 @@ setMethod("vcDebug", "BSysProject",
       save.image(file=debugSessionPath)
 
       # spawn Visual Studio Code
-      system(paste("code ", sourcePath(.Object) ,".", sep=""), wait=FALSE)
+      tr <- try(system(paste("code ", sourcePath(.Object) ,".", sep=""), wait=FALSE), silent=TRUE)
+
+      if (is(tr, "try-error"))
+      {
+        warning("Cannot find Visual Studio Code. Please ensure it is installed.")
+      } 
     }
     else
     {

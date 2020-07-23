@@ -141,11 +141,7 @@ Maintainer: \packageMaintainer{BuildSys}
 \code{\link{BuildSys-package}}
 }
 \note{
-  see \code{\link{BuildSys-package}} example code for creation of \code{Project} in example below.
-}
-\examples{
-  # re-initialise project from current working directory
-  Project <- initProjectFromFolder(Project)
+  see \code{\link{BuildSys-package}} for examples of use.
 }
 
 \keyword{debugging}
