@@ -619,12 +619,33 @@ setMethod("buildMakefile", "BSysProject",
       CXXFLAGS <- c("$(COMMONFLAGS)", "-Wno-ignored-attributes", .Object@CXXFLAGS)
       FFLAGS   <- c("$(COMMONFLAGS)", .Object@FFLAGS)
 
+      gcc.path <- normalizePath(Sys.which("gcc"), "/", mustWork=FALSE)
+      gcc.dir  <- ""
+
+      if (grepl("mingw", gcc.path))
+      {
+        # windows
+        # Need the correct compiler for the architecture. Sys.which() just picks up whichever one is in the PATH
+        if (Sys.info()["machine"]=="x86-64")
+        {
+          # mingw64
+          gcc.path <- sub("/mingw\\d\\d", "/mingw64", gcc.path)
+        }
+        else
+        {
+          # mingw32
+          gcc.path <- sub("/mingw\\d\\d", "/mingw32", gcc.path)
+        }
+
+        gcc.dir <- sub("/gcc.*", "/", gcc.path)
+      }
+      
       # Build makefile
       MakefileTxt <-c(
         idStamp(),
-        "CC=gcc",
-        "CXX=g++",
-        "FC=gfortran",
+        paste("CC=", gcc.dir, "gcc", sep=""),
+        paste("CXX=", gcc.dir, "g++", sep=""),
+        paste("FC=", gcc.dir, "gfortran", sep=""),
         paste("COMMONFLAGS=", paste(COMMONFLAGS, collapse="\\\n"), sep=""),
         paste("CFLAGS=", paste(CFLAGS, collapse="\\\n"), sep=""),
         paste("CXXFLAGS=", paste(CXXFLAGS, collapse="\\\n"), sep=""),
@@ -1085,7 +1106,7 @@ setMethod("vcDebug", "BSysProject",
       }
       else if (!file.attr$isdir)
       {
-        stop(paste("Cannot create", RprofileFolder, "folder as .vscode file exists."))
+        warning(paste("Cannot create", RprofileFolder, "folder as .vscode file exists."))
       }
 
       # create .vscode folder if needed
@@ -1099,7 +1120,7 @@ setMethod("vcDebug", "BSysProject",
       }
       else if (!file.attr$isdir)
       {
-        stop("Cannot create .vscode folder as .vscode file exists.")
+        warning("Cannot create .vscode folder as .vscode file exists.")
       }
 
       debug.app        <- "gdb"
@@ -1113,7 +1134,7 @@ setMethod("vcDebug", "BSysProject",
 
         if (!file.exists(R.path))
         {
-          stop("Cannot find R.")
+          warning("Cannot find R.")
         }
         
         gdb.path  <- "/Applications/Xcode.app/Contents/Developer/usr/bin/lldb-mi"
@@ -1121,7 +1142,7 @@ setMethod("vcDebug", "BSysProject",
 
         if (!file.exists(gdb.path))
         {
-          stop("Cannot find lldb-mi. Ensure Xcode is installed.")
+          warning("Cannot find lldb-mi. Ensure Xcode is installed.")
         }
 
         external.console <- "false"
@@ -1140,7 +1161,7 @@ setMethod("vcDebug", "BSysProject",
 
         if (nchar(gdb.path) == 0)
         {
-          stop(paste("Cannot find path to gdb. Check that", debug.app, "is accessible via the PATH environment variable."))
+          warning(paste("Cannot find path to gdb. Check that", debug.app, "is accessible via the PATH environment variable."))
         }
       }
 
@@ -1148,7 +1169,7 @@ setMethod("vcDebug", "BSysProject",
 
       if (nchar(gcc.path) == 0)
       {
-        stop("Cannot find path to gcc. Check that gcc is accessible via the PATH environment variable.")
+        warning("Cannot find path to gcc. Check that gcc is accessible via the PATH environment variable.")
       }
 
       # build intellisense include paths
@@ -1159,6 +1180,18 @@ setMethod("vcDebug", "BSysProject",
       if (grepl("mingw", gcc.path))
       {
         # windows
+        # Need the correct compiler for the architecture. Sys.which() just picks up whichever one is in the PATH
+        if (Sys.info()["machine"]=="x86-64")
+        {
+          # mingw64
+          gcc.path <- sub("/mingw\\d\\d", "/mingw64", gcc.path)
+        }
+        else
+        {
+          # mingw32
+          gcc.path <- sub("/mingw\\d\\d", "/mingw32", gcc.path)
+        }
+
         rtools.path           <- sub("/mingw.*", "/", gcc.path)
         gcc.include           <- sub("/bin/gcc.*", "/include", gcc.path)
         intellisense.includes <- paste(intellisense.includes, ",\"", gcc.include, "/**\"", sep="")
