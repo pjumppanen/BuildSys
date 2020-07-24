@@ -31,7 +31,7 @@ to it in an attempt to resolve the build problem. By having a system approach wh
 the centre of the build process and are not transient, the process of debugging build issues is made
 simpler.
 
-Finally, a major part of developing library code is debugging and standard emph{R} provides little support
+Finally, a major part of developing library code is debugging and standard \emph{R} provides little support
 for that. Developers typically rely on \emph{gdb / lldb} command line driven debugger support, which is
 daunting for an inexperienced user, so much so that many will simply resort to print statement based
 debugging approaches, which whilst capable of resolving bugs is a cumbersome and slow approach. What
