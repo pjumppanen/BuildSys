@@ -738,7 +738,7 @@ setMethod("make", "BSysProject",
       CapturePath  <- paste(.Object@WorkingFolder, .Object@ProjectName, ".log", sep="")
       ScriptPath   <- paste(.Object@WorkingFolder, .Object@ProjectName, ".sh", sep="")
       FinishedFile <- paste(.Object@WorkingFolder, .Object@ProjectName, ".fin", sep="")
-      CaptureCmd   <- if (IsWindows) paste("| tee", CapturePath) else ""
+      CaptureCmd   <- if (IsWindows) paste("2>&1 | tee", CapturePath) else ""
 
       # run make
       if (Operation == "clean")

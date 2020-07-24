@@ -1,8 +1,8 @@
 Package: BuildSys
 Type: Package
 Title: System for Building and Debugging C/C++ Dynamic Libraries in R
-Version: 1.01
-Date: 2020-07-23
+Version: 1.02
+Date: 2020-07-24
 Author: Paavo Jumppanen
 Maintainer: Paavo Jumppanen <paavo.jumppanen@csiro.au>
 Description: A build system based on GNU make that creates and
