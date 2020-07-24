@@ -1,0 +1,5 @@
+BuildSys - System for Building and Debugging C/C++ Dynamic Libraries in R
+-------------------------------------------------------------------------
+BuildSys is a build system based on GNU make that creates and maintains 
+(simply) make files in an R session and provides GUI debugging support 
+through Microsoft Visual Code.
