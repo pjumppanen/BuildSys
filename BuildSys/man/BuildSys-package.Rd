@@ -11,14 +11,14 @@
 \details{
 In the standard \emph{R} approach dynamic libraries are typically built using the \emph{R CMD} interface.
 That interface in turn uses the \emph{GNU make} system to build the library but only in a transient fashion.
-In other words, a makefile is constructucted based off a bundled template, \emph{GNU make} is executed to
+In other words, a makefile is constructucted based upon a bundled template, \emph{GNU make} is executed to
 compile and link the library and the makefile deleted post completion. Whilst this is a reasonable
-approach for simple one source file projects it bypasses the benefits of a makefile in the case
+approach for simple \emph{one source file} projects, it bypasses the benefits of a makefile in the case
 of more complex ones.
 
 For example, consider the case of developing a library with multiple interface functions contained
 within, with each function implementation implemented in a separate source file. Lets say there are
-five of these. With the traditional \emph{R} approach with each change in code to one of the source files
+five of these. With the traditional \emph{R} approach, with each change in code to one of the source files
 all the source files will be re-built and linked because the makefile is transient and re-created
 every time. If we were to construct a traditional makefile and use make in the more typical manner
 then only the files that need re-compilation will be re-compiled. In complex projects this saves
@@ -52,15 +52,15 @@ the appropriate project definition. For example,
 \code{Project <- new("BSysProject")}
 
 will search the \emph{R} working directory for source files (\code{.c, .cpp} etc) and add them to the project definition.
-In searching for source files it will also scan the source for include statements and any found includes
+In searching for source files it will also scan the found source files for include statements and any found includes
 will be saved as dependencies for the give source file. No attempt is made to properly parse the source so
 if the code uses conditional preprocessing statements the situation may arrise that an include file is
 marked as a dependency when for the given build configuration it may not be. In any case, this will not
-affect the ability to correctly build the library but just means the dependencies are marked large than true.
+affect the ability to correctly build the library but just means the dependencies are marked wider than true.
 
 Another feature of the dependency check is that any include files not found are considered externalities and
 if they belong to a known set, will result in the automatic addition of library and include path dependencies
-for the project. Currently \code{BuildSys} knows about \code{TMB.hpp, Rcpp.hpp} and \code{RcppEigen.hpp} so if any of these are
+for the project. Currently \code{BuildSys} knows about \code{TMB.hpp, Rcpp.hpp} and \code{RcppEigen.hpp}, so if any of these are
 included into the source file then the necessary include file and define dependencies will be added. This added
 feature means \emph{TMB} and \emph{Rcpp} users have minimalistic usage requirements to construct libraries with \code{BuildSys} and
 need not provide any additional information other than the source files being compiled.
@@ -96,7 +96,7 @@ That is,
 \code{Project <- new("BSysProject", Name="MyProject", WorkingFolder="MyFolder", Flat=FALSE, SourceName="source", IncludeName="header")}
 
 Given an existing project, we can also re-initialize it using the \code{initProjectFromFolder} method which has the same
-argument list as the \code{initialize} method (it is acutally called from the \code{initialize} method). For instance, as with the above,
+argument list as the \code{initialize} method (it is actually called from the \code{initialize} method). For instance, as with the above,
 
 \code{Project <- initProjectFromFolder(Project, Name="MyProject", WorkingFolder="MyFolder", Flat=FALSE, SourceName="source", IncludeName="header")}
 }
@@ -118,11 +118,11 @@ dependencies will be recompiled and linked into a new dynamic library build.
 
 Internally \code{make} will call the \code{buildMakefile} method to first construct an up to date makefile representing
 the project. Each makefile has a \emph{md5 digest} in it which will be updated should you alter the project at all and
-this stamp is then used to determine if the makefile needs re-construction. If the makefile is re-constructure during
+this stamp is then used to determine if the makefile needs re-construction. If the makefile is re-constructed during
 a call to \code{make} then a make clean operation will be carried out to ensure the entire project is re-built. This
 should ensure that the state of the project, makefile and the build remains in sync.
 
-Finally, if your project needs to install the library and/or include files to a specific location that is also
+Finally, if your project needs to install the library and/or include files to a specific location, that behaviour is also
 catered for in \code{BuildSys}. Simply specify the install locations with the \code{InstallLibraryName} and \code{InstallIncludeName}
 arguments in the \code{BSysProject} initializer. For instance,
 
@@ -133,7 +133,7 @@ arguments in the \code{BSysProject} initializer. For instance,
 \subsection{Loading and Unloading the Library}{
 Once the project is made using the \code{make} method the dynamic library can be loaded into \emph{R} memory. We do so using the
 \code{loadLibrary} method and we can similarly unload the library using the \code{unloadLibrary} method. The library
-name is based apon the project name and the path to the library can be obtained with the \code{libraryPath} method. For example,
+name is based upon the project name and the path to the library can be obtained with the \code{libraryPath} method. For example,
 
 \preformatted{
 loadLibrary(Project) # load the library built by Project
@@ -146,7 +146,7 @@ libraryPath(Project) # return the path to the library built by Project
 
 \subsection{Debugging the Library}{
 To debug a dynamic library a debug build must be made to include the symbolic information needed with the dynamic library.
-By default projects constructed using \code{BuildSys} will be created as debug builds. This is controlled by the \code{Debug} argument
+By default, projects constructed using \code{BuildSys} will be created as debug builds. This is controlled by the \code{Debug} argument
 supplied in the call to the \code{BSysProject} initilizer. For instance,
 
 \code{Project <- new("BSysProject", Debug=TRUE)}
@@ -188,10 +188,10 @@ here:
 
 \href{https://code.visualstudio.com/download}{Download Visual Studio Code}
 
-Choose the appropriate installer for your operating system. The installer should include \emph{Code} in the \code{PATH} environment variable.
+Choose the appropriate installer for your operating system. The installer should include \emph{code} in the \code{PATH} environment variable.
 Verify this by opening a new shell/command prompt and typing,
 
-\code{Code}
+\code{code}
 
 and enter. If \emph{Visual Code} starts then the \code{PATH} enviroment variable is correctly set. If it fails to start then add it to the
 system \code{PATH} environment variable.
@@ -244,7 +244,7 @@ many and varied ways to do so depending on the distribution being used. Please c
 on installing development tools on \emph{Linux}.
 
 Finally, you will also need to install the \emph{Microsoft C/C++ IntelliSense, debugging, and code browsing} extension in
-\emph{Microsoft Visual Code}. To install simply start \emph{Visual Code}, open a C or C++ file and \emph{Visual Code} will
+\emph{Microsoft Visual Code}. To install, simply start \emph{Visual Code}, open a C or C++ file and \emph{Visual Code} will
 prompt you about installing the extension. Simply install it when prompted to do so.
 }
 }
