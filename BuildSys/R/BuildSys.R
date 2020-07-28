@@ -1089,12 +1089,54 @@ setMethod("vcDebug", "BSysProject",
 
     if (LaunchEditor)
     {
-      architecture <- function()
+      # Helper to obtain info for json files
+      getIntellisenseInfo <- function()
       {
+        TargetName   <- ""
+        OS           <- Sys.info()[["sysname"]]
         Architecture <- Sys.info()[["machine"]]
-        Architecture <- gsub("x86-64", "x86_64", Architecture)
+        Extra        <- NULL
 
-        return (Architecture)
+        if (OS == "Windows")
+        {
+          TargetName <- "Win32"
+          Mode       <- "gcc"    
+        }
+        else if (OS == "Linux")
+        {
+          TargetName <- "Linux"
+          Mode       <- "gcc"    
+        }
+        else if (OS == "Darwin")
+        {
+          TargetName <- "Mac"
+          Mode       <- "clang"
+          Extra      <- "    \"macFrameworkPath\": [\"/System/Library/Frameworks\"],"
+        }
+        else
+        {
+          warning(paste("Unsupported intellisense target:", OS))
+        }
+
+        if (Architecture =="x86-64")
+        {
+          Architecture <- "x86_64"
+          Mode         <- paste(Mode, "-x64", sep="")
+        }
+        else if (Architecture =="x86_64")
+        {
+          Mode         <- paste(Mode, "-x64", sep="")
+        }
+        else if (Architecture == "x86")
+        {
+          Mode         <- paste(Mode, "-x86", sep="")
+        }
+        else
+        {
+          warning("Unknown intellisense architecture")
+        }
+
+        return (list(TargetName=TargetName, Architecture=Architecture, Mode=Mode))
       }
 
       # create Rprofile folder
@@ -1176,6 +1218,7 @@ setMethod("vcDebug", "BSysProject",
       R.include             <- R.home("include")
       intellisense.includes <- ""
       intellisense.defines  <- paste(sapply(.Object@Defines, function(str) {paste("\"", str, "\"", sep="")}), collapse=",", sep="")
+      intellisense.info     <- getIntellisenseInfo()
 
       if (grepl("mingw", gcc.path))
       {
@@ -1259,7 +1302,7 @@ setMethod("vcDebug", "BSysProject",
       paste("      \"name\": \"(", debug.app, ") Launch\",", sep=""),
       "      \"type\": \"cppdbg\",",
       "      \"request\": \"launch\",",
-      paste("      \"targetArchitecture\":\"", architecture(),"\",", sep=""),
+      paste("      \"targetArchitecture\":\"", intellisense.info$Architecture,"\",", sep=""),
       paste("      \"program\": \"", R.path, "\",", sep=""),
       paste("      \"args\": [", R.args, "],", sep=""),
       "      \"stopAtEntry\": false,",
@@ -1283,78 +1326,27 @@ setMethod("vcDebug", "BSysProject",
       writeLines(launch_lines, launch_file)
       close(launch_file)
 
-      # Helper to obtain c_cpp_properties.json name attribute
-      getIntellisenseTargetName <- function()
-      {
-        TargetName <- ""
-        OS         <- Sys.info()["sysname"]
-
-        if (OS == "Windows")
-        {
-          TargetName <- "Win32"
-        }
-        else if (OS == "Linux")
-        {
-          TargetName <- "Linux"
-        }
-        else if (OS == "Darwin")
-        {
-          TargetName <- "Mac"
-        }
-        else
-        {
-          warning(paste("Unsupported intellisense target:", OS))
-        }
-
-        return (TargetName)
-      }
-
       # create c_cpp_properties.json
-      if (IsDarwin)
-      {
-        c_cpp_properties_lines <- c(
-        "{",
-        "  \"configurations\": [",
-        "  {",
-        paste("    \"name\": \"", getIntellisenseTargetName(), "\",", sep=""), 
-        "    \"intelliSenseMode\": \"clang-x64\",",
-        paste("    \"includePath\": [\"${workspaceFolder}\"", intellisense.includes, "],", sep=""),
-        "    \"macFrameworkPath\": [\"/System/Library/Frameworks\"],",
-        paste("    \"defines\": [", intellisense.defines, "],", sep=""),
-        paste("    \"compilerPath\": \"", gcc.path, "\",", sep=""), 
-        "    \"cStandard\": \"c89\",",
-        "    \"cppStandard\": \"c++14\",",
-        "    \"browse\": {",
-        "       \"limitSymbolsToIncludedHeaders\": true,",
-        "       \"databaseFilename\": \"\"",
-        "      }",
-        "    }",
-        "  ],",
-        "  \"version\": 4",
-        "}")
-      }
-      else
-      {
-        c_cpp_properties_lines <- c(
-        "{",
-        "  \"configurations\": [",
-        "  {",
-        paste("    \"name\": \"", getIntellisenseTargetName(), "\",", sep=""), 
-        "    \"intelliSenseMode\": \"gcc-x64\",",
-        paste("    \"includePath\": [\"${workspaceFolder}\"", intellisense.includes, "],", sep=""),
-        paste("    \"defines\": [", intellisense.defines, "],", sep=""),
-        paste("    \"compilerPath\": \"", gcc.path, "\",", sep=""), 
-        "    \"cStandard\": \"c89\",",
-        "    \"cppStandard\": \"c++14\",",
-        "    \"browse\": {",
-        "       \"limitSymbolsToIncludedHeaders\": true,",
-        "       \"databaseFilename\": \"\"",
-        "      }",
-        "    }",
-        "  ],",
-        "  \"version\": 4",
-        "}")
-      }
+      c_cpp_properties_lines <- c(
+      "{",
+      "  \"configurations\": [",
+      "  {",
+      paste("    \"name\": \"", intellisense.info$TargetName, "\",", sep=""), 
+      paste("    \"intelliSenseMode\": \"", intellisense.info$Mode, "\",", sep=""),
+      paste("    \"includePath\": [\"${workspaceFolder}\"", intellisense.includes, "],", sep=""),
+      intellisense.info$Extra,
+      paste("    \"defines\": [", intellisense.defines, "],", sep=""),
+      paste("    \"compilerPath\": \"", gcc.path, "\",", sep=""), 
+      "    \"cStandard\": \"c89\",",
+      "    \"cppStandard\": \"c++14\",",
+      "    \"browse\": {",
+      "       \"limitSymbolsToIncludedHeaders\": true,",
+      "       \"databaseFilename\": \"\"",
+      "      }",
+      "    }",
+      "  ],",
+      "  \"version\": 4",
+      "}")
 
       c_cpp_properties_file <- file(paste(vsCodeFolder, "/c_cpp_properties.json", sep=""), "wb")
       writeLines(c_cpp_properties_lines, c_cpp_properties_file)
