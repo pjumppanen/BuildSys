@@ -14,6 +14,7 @@
 \alias{sourcePath,BSysProject-method}
 \alias{unloadLibrary,BSysProject-method}
 \alias{vcDebug,BSysProject-method}
+\alias{clean,BSysProject-method}
 
 \title{Class \code{"BSysProject"}}
 \description{
@@ -146,6 +147,7 @@ For more information consult \code{\link{initProjectFromFolder}}.
     \item{sourcePath}{\code{signature(.Object = "BSysProject")}: \code{\link{sourcePath}} }
     \item{unloadLibrary}{\code{signature(.Object = "BSysProject")}: \code{\link{unloadLibrary}} }
     \item{vcDebug}{\code{signature(.Object = "BSysProject")}: \code{\link{vcDebug}} }
+    \item{clean}{\code{signature(.Object = "BSysProject")}: \code{\link{clean}} }
 	 }
 }
 \author{

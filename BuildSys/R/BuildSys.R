@@ -790,7 +790,7 @@ setMethod("make", "BSysProject",
 
       command.line <- paste(Sys.which("bash"), ScriptPath)
       unlink(FinishedFile)
-
+      
       unloadLibrary(.Object)
 
       if (Sys.info()["sysname"] == "Windows")
@@ -812,6 +812,7 @@ setMethod("make", "BSysProject",
       }
 
       unlink(FinishedFile)
+      unlink(ScriptPath)
 
       if (IsWindows)
       {
@@ -1007,6 +1008,48 @@ setMethod("unloadLibrary", "BSysProject",
     {
       cat("Note: Library", libPath, "was unloaded.\n")
     }
+  }
+)
+
+
+# -----------------------------------------------------------------------------
+# Method to cleanup project of created files and folders 
+# -----------------------------------------------------------------------------
+setGeneric("clean", function(.Object, ...) standardGeneric("clean"))
+
+setMethod("clean", "BSysProject",
+  function(.Object)
+  {
+    # remove makefile
+    if (nchar(.Object@ObjName) != 0)
+    {
+      MakefilePath <- paste(.Object@WorkingFolder, .Object@ObjName, "/makefile", sep="")
+    }
+    else
+    {
+      MakefilePath <- paste(.Object@WorkingFolder, "makefile", sep="")
+    }
+
+    unlink(MakefilePath)
+
+    # remove debug related files and folders
+    RprofileFolder        <- paste(sourcePath(.Object), .Object@ProjectName, ".Rprof", sep="")
+    debugProjectPath      <- paste(RprofileFolder, "/", .Object@ProjectName, "_DebugProject.RData", sep="")
+    debugSessionPath      <- paste(RprofileFolder, "/", .Object@ProjectName, "_DebugSession.RData", sep="")
+    Rprofile.path         <- paste(RprofileFolder, "/.Rprofile", sep="")
+
+    unlink(debugProjectPath)
+    unlink(debugSessionPath)
+    unlink(Rprofile.path)
+    unlink(RprofileFolder, recursive=TRUE, force=TRUE)
+
+    vsCodeFolder          <- paste(sourcePath(.Object), ".vscode", sep="")
+    launch.file           <- paste(vsCodeFolder, "/launch.json", sep="")
+    c_cpp_properties.file <- paste(vsCodeFolder, "/c_cpp_properties.json", sep="")
+
+    unlink(launch.file)
+    unlink(c_cpp_properties.file)
+    unlink(vsCodeFolder, recursive=TRUE, force=TRUE)
   }
 )
 

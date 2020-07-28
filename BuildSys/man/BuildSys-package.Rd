@@ -267,6 +267,7 @@ Maintainer: \packageMaintainer{BuildSys}
 \code{\link{objPath}}
 \code{\link{installLibraryPath}}
 \code{\link{installIncludePath}}
+\code{\link{clean}}
 }
 
 \examples{
@@ -352,6 +353,11 @@ vcDebug(Project)
 
 # unload the shared library
 unloadLibrary(Project)
+
+# clean up example
+Project <- make(Project, "clean")
+clean(Project)
+unlink("convolve.c")
 }
 
 \keyword{package}
