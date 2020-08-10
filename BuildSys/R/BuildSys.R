@@ -752,6 +752,11 @@ setMethod("make", "BSysProject",
   {
     runMake <- function(.Object, Operation)
     {
+      quoteArg <- function(arg)
+      {
+        return (paste0("\"", arg, "\""))
+      }
+
       IsWindows <- (Sys.info()["sysname"] == "Windows")
       DlibName  <- dynlib(.Object@ProjectName)
 
@@ -759,20 +764,20 @@ setMethod("make", "BSysProject",
       CapturePath  <- paste(.Object@WorkingFolder, .Object@ProjectName, ".log", sep="")
       ScriptPath   <- paste(.Object@WorkingFolder, .Object@ProjectName, ".sh", sep="")
       FinishedFile <- paste(.Object@WorkingFolder, .Object@ProjectName, ".fin", sep="")
-      CaptureCmd   <- if (IsWindows) paste("2>&1 | tee", CapturePath) else ""
+      CaptureCmd   <- if (IsWindows) paste("2>&1 | tee", quoteArg(CapturePath)) else ""
 
       # run make
       if (Operation == "clean")
       {
-        operation <- paste("make -C", ObjFolder, "clean", CaptureCmd)
+        operation <- paste("make -C", quoteArg(ObjFolder), "clean", CaptureCmd)
       } 
       else if (Operation == "install")
       {
-        operation <- paste("make -C", ObjFolder, "install", CaptureCmd)
+        operation <- paste("make -C", quoteArg(ObjFolder), "install", CaptureCmd)
       } 
       else if (Operation == "")
       {
-        operation <- paste("make -C", ObjFolder, CaptureCmd)
+        operation <- paste("make -C", quoteArg(ObjFolder), CaptureCmd)
       }
       else
       {
@@ -782,13 +787,13 @@ setMethod("make", "BSysProject",
       # construct caller script
       BashScript <- c("#!/bin/bash",
                       operation,
-                      paste("echo finished >", FinishedFile))
+                      paste("echo finished >", quoteArg(FinishedFile)))
 
       ScriptFile <- file(ScriptPath, "wt")
       writeLines(BashScript, ScriptFile)
       close(ScriptFile)
 
-      command.line <- paste(Sys.which("bash"), ScriptPath)
+      command.line <- paste(Sys.which("bash"), quoteArg(ScriptPath))
       unlink(FinishedFile)
       
       unloadLibrary(.Object)
