@@ -248,6 +248,7 @@ Finally, you will also need to install the \emph{Microsoft C/C++ IntelliSense, d
 prompt you about installing the extension. Simply install it when prompted to do so.
 }
 }
+
 \author{
 \packageAuthor{BuildSys}
 
@@ -268,6 +269,11 @@ Maintainer: \packageMaintainer{BuildSys}
 \code{\link{installLibraryPath}}
 \code{\link{installIncludePath}}
 \code{\link{clean}}
+}
+
+\note{
+If the absolute path to source and dynamic library files contains spaces then debugging in \emph{Visual Code} fails to function correctly.
+To ensure code is debuggable users will need to avoid putting code in folders with whitespace in the folder names.
 }
 
 \examples{

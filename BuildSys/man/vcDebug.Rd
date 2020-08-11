@@ -54,6 +54,9 @@
 
 \note{
   see \code{\link{BuildSys-package}} for examples of use.
+
+  If the absolute path to source and dynamic library files contains spaces then debugging in \emph{Visual Code} fails to function correctly.
+  To ensure code is debuggable users will need to avoid putting code in folders with whitespace in the folder names.
 }
 
 \keyword{debugging}
