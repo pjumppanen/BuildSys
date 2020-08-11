@@ -1144,11 +1144,13 @@ setMethod("vcDebug", "BSysProject",
         OS           <- Sys.info()[["sysname"]]
         Architecture <- Sys.info()[["machine"]]
         Extra        <- NULL
+        ShortPath    <- function(arg) {return (arg)}
 
         if (OS == "Windows")
         {
           TargetName <- "Win32"
           Mode       <- "gcc"    
+          ShortPath  <- function(arg) {gsub("\\\\", "/", shortPathName(arg))}
         }
         else if (OS == "Linux")
         {
@@ -1184,7 +1186,7 @@ setMethod("vcDebug", "BSysProject",
           warning("Unknown intellisense architecture")
         }
 
-        return (list(TargetName=TargetName, Architecture=Architecture, Mode=Mode))
+        return (list(TargetName=TargetName, Architecture=Architecture, Mode=Mode, normPath=ShortPath))
       }
 
       # create Rprofile folder
@@ -1267,6 +1269,7 @@ setMethod("vcDebug", "BSysProject",
       intellisense.includes <- ""
       intellisense.defines  <- paste(sapply(.Object@Defines, function(str) {paste("\"", str, "\"", sep="")}), collapse=",", sep="")
       intellisense.info     <- getIntellisenseInfo()
+      normPath              <- intellisense.info$normPath
 
       if (grepl("mingw", gcc.path))
       {
@@ -1292,12 +1295,12 @@ setMethod("vcDebug", "BSysProject",
 
         if (file.exists(root.include))
         {
-          intellisense.includes <- paste(intellisense.includes, ",\"", root.include, "/**\"", sep="")
+          intellisense.includes <- paste(intellisense.includes, ",\"", normPath(root.include), "/**\"", sep="")
         }
 
         if (file.exists(root.user.include))
         {
-          intellisense.includes <- paste(intellisense.includes, ",\"", root.user.include, "/**\"", sep="")
+          intellisense.includes <- paste(intellisense.includes, ",\"", normPath(root.user.include), "/**\"", sep="")
         }
       }
       else
@@ -1308,22 +1311,22 @@ setMethod("vcDebug", "BSysProject",
 
         if (file.exists(gcc.include))
         {
-          intellisense.includes <- paste(intellisense.includes, ",\"", gcc.include, "/**\"", sep="")
+          intellisense.includes <- paste(intellisense.includes, ",\"", normPath(gcc.include), "/**\"", sep="")
         }
 
         if (file.exists(gcc.local.include))
         {
-          intellisense.includes <- paste(intellisense.includes, ",\"", gcc.local.include, "/**\"", sep="")
+          intellisense.includes <- paste(intellisense.includes, ",\"", normPath(gcc.local.include), "/**\"", sep="")
         }
       }
 
-      intellisense.includes <- paste(intellisense.includes, ",\"", R.include, "/**\"", sep="")
-      intellisense.includes <- paste(intellisense.includes, ",\"", includePath(.Object), "**\"", sep="")
+      intellisense.includes <- paste(intellisense.includes, ",\"", normPath(R.include), "/**\"", sep="")
+      intellisense.includes <- paste(intellisense.includes, ",\"", normPath(includePath(.Object)), "**\"", sep="")
 
       # add other include paths
       for (include in .Object@Includes)
       {
-        intellisense.includes <-  paste(intellisense.includes, ",\"", include, "/**\"", sep="")
+        intellisense.includes <-  paste(intellisense.includes, ",\"", normPath(include), "/**\"", sep="")
       }
 
       # create debugRprofile.txt environment setup file for gdb debug session
@@ -1351,14 +1354,14 @@ setMethod("vcDebug", "BSysProject",
       "      \"type\": \"cppdbg\",",
       "      \"request\": \"launch\",",
       paste("      \"targetArchitecture\":\"", intellisense.info$Architecture,"\",", sep=""),
-      paste("      \"program\": \"", R.path, "\",", sep=""),
+      paste("      \"program\": \"", normPath(R.path), "\",", sep=""),
       paste("      \"args\": [", R.args, "],", sep=""),
       "      \"stopAtEntry\": false,",
-      paste("      \"cwd\": \"", RprofileFolder, "\",", sep=""),
+      paste("      \"cwd\": \"", normPath(RprofileFolder), "\",", sep=""),
       paste("      \"environment\": [{\"name\":\"R_HOME\",\"value\":\"",R.home(),"\"}],", sep=""),
       paste("      \"externalConsole\": ", external.console, ",", sep=""),
       paste("      \"MIMode\": \"", debug.app, "\",", sep=""),
-      paste("      \"miDebuggerPath\": \"", gdb.path, "\",", sep=""),
+      paste("      \"miDebuggerPath\": \"", normPath(gdb.path), "\",", sep=""),
       "      \"setupCommands\": [",
       "        {",
       paste("          \"description\": \"Enable pretty-printing for ", debug.app, "\",", sep=""),
@@ -1384,7 +1387,7 @@ setMethod("vcDebug", "BSysProject",
       paste("    \"includePath\": [\"${workspaceFolder}\"", intellisense.includes, "],", sep=""),
       intellisense.info$Extra,
       paste("    \"defines\": [", intellisense.defines, "],", sep=""),
-      paste("    \"compilerPath\": \"", gcc.path, "\",", sep=""), 
+      paste("    \"compilerPath\": \"", normPath(gcc.path), "\",", sep=""), 
       "    \"cStandard\": \"c89\",",
       "    \"cppStandard\": \"c++14\",",
       "    \"browse\": {",
@@ -1410,7 +1413,7 @@ setMethod("vcDebug", "BSysProject",
       save.image(file=debugSessionPath)
 
       # spawn Visual Studio Code
-      tr <- try(system(paste("code ", sourcePath(.Object) ,".", sep=""), wait=FALSE), silent=TRUE)
+      tr <- try(system(paste("code \"", sourcePath(.Object) ,".\"", sep=""), wait=FALSE), silent=TRUE)
 
       if (is(tr, "try-error"))
       {
