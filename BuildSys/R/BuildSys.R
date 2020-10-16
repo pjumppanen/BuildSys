@@ -34,7 +34,7 @@ setClass("BSysSourceFile",
 # Constructor for SourceFile class
 # -----------------------------------------------------------------------------
 setMethod("initialize", "BSysSourceFile",
-  function(.Object, Filename, IncludeFolder, Type)
+  function(.Object, Filename, SrcFolder, IncludeFolder, Type)
   {
     .Object@Filename     <- Filename
     .Object@Type         <- Type
@@ -88,7 +88,9 @@ setMethod("initialize", "BSysSourceFile",
       return (.Object)
     }
 
-    return (buildDependencies(.Object, Filename))
+    FilePath <- paste0(SrcFolder, Filename)
+
+    return (buildDependencies(.Object, FilePath))
   }
 )
 
@@ -260,6 +262,14 @@ setMethod("initProjectFromFolder", "BSysProject",
       KnownLibDependencies <- list(BLAS.h="blas", Lapack.h="lapack", iconv.h="iconv")
     }
 
+    testFolder <- function(Path)
+    {
+      if (!dir.exists(Path))
+      {
+        cat("The folder", Path, "does not exist.\n")
+      }
+    }
+
     addExternalDependencies <- function(SourceFile, CodeProject)
     {
       if (CodeProject@IsDebug)
@@ -382,16 +392,24 @@ setMethod("initProjectFromFolder", "BSysProject",
     .Object@IsDebug             <- Debug
     .Object@DebugState          <- list()
 
+    testFolder(.Object@WorkingFolder)
+
     if (!Flat)
     {
       .Object@SourceName  <- addSlash(SourceName)
       .Object@IncludeName <- addSlash(IncludeName)
       .Object@ObjName     <- addSlash(ObjName)
+      ObjectFolder        <- paste(.Object@WorkingFolder, .Object@ObjName, sep="")
+
+      testFolder(ObjectFolder)
     } 
 
     if (!identical(character(0), InstallLibraryName))
     {
       .Object@InstallLibraryName <- addSlash(InstallLibraryName)
+      InstallLibraryFolder       <- paste(.Object@WorkingFolder, .Object@InstallLibraryName, sep="")
+
+      testFolder(InstallLibraryFolder)
     }
 
     if (!identical(character(0), InstallIncludeName))
@@ -401,6 +419,10 @@ setMethod("initProjectFromFolder", "BSysProject",
 
     SrcFolder     <- paste(.Object@WorkingFolder, .Object@SourceName, sep="")
     IncludeFolder <- paste(.Object@WorkingFolder, .Object@IncludeName, sep="")
+    
+    testFolder(SrcFolder)
+    testFolder(IncludeFolder)
+    
     AllFiles      <- dir(SrcFolder)
 
     for (File in AllFiles)
@@ -408,21 +430,21 @@ setMethod("initProjectFromFolder", "BSysProject",
       if (grepl("\\.c$", File))
       {
         # c source file
-        SourceFile <- new("BSysSourceFile", File, IncludeFolder, "c")
+        SourceFile <- new("BSysSourceFile", File, SrcFolder, IncludeFolder, "c")
 
         .Object@SourceFiles[[length(.Object@SourceFiles) + 1]] <- SourceFile 
       }
       else if (grepl("\\.cpp$", File))
       {
         # c++ source file
-        SourceFile <- new("BSysSourceFile", File, IncludeFolder, "cpp")
+        SourceFile <- new("BSysSourceFile", File, SrcFolder, IncludeFolder, "cpp")
 
         .Object@SourceFiles[[length(.Object@SourceFiles) + 1]] <- SourceFile 
       }
       else if ((grepl("\\.f$|\\.for$|\\.f95$|\\.f90$|\\.f77$", File)))
       {
         # fortran source file
-        SourceFile <- new("BSysSourceFile", File, IncludeFolder, "f")
+        SourceFile <- new("BSysSourceFile", File, SrcFolder, IncludeFolder, "f")
 
         .Object@SourceFiles[[length(.Object@SourceFiles) + 1]] <- SourceFile 
       }
@@ -1165,7 +1187,7 @@ setMethod("vcDebug", "BSysProject",
         }
         else
         {
-          warning(paste("Unsupported intellisense target:", OS))
+          cat(paste("Unsupported intellisense target:", OS,"\n"))
         }
 
         if (Architecture =="x86-64")
@@ -1183,7 +1205,7 @@ setMethod("vcDebug", "BSysProject",
         }
         else
         {
-          warning("Unknown intellisense architecture")
+          cat("Unknown intellisense architecture\n")
         }
 
         return (list(TargetName=TargetName, Architecture=Architecture, Mode=Mode, normPath=ShortPath))
@@ -1198,7 +1220,7 @@ setMethod("vcDebug", "BSysProject",
       }
       else if (!file.attr$isdir)
       {
-        warning(paste("Cannot create", RprofileFolder, "folder as .vscode file exists."))
+        cat(paste("Cannot create", RprofileFolder, "folder as .vscode file exists.\n"))
       }
 
       # create .vscode folder if needed
@@ -1212,7 +1234,7 @@ setMethod("vcDebug", "BSysProject",
       }
       else if (!file.attr$isdir)
       {
-        warning("Cannot create .vscode folder as .vscode file exists.")
+        cat("Cannot create .vscode folder as .vscode file exists.\n")
       }
 
       debug.app        <- "gdb"
@@ -1226,7 +1248,7 @@ setMethod("vcDebug", "BSysProject",
 
         if (!file.exists(R.path))
         {
-          warning("Cannot find R.")
+          cat("Cannot find R.\n")
         }
         
         gdb.path  <- "/Applications/Xcode.app/Contents/Developer/usr/bin/lldb-mi"
@@ -1234,7 +1256,7 @@ setMethod("vcDebug", "BSysProject",
 
         if (!file.exists(gdb.path))
         {
-          warning("Cannot find lldb-mi. Ensure Xcode is installed.")
+          cat("Cannot find lldb-mi. Ensure Xcode is installed.\n")
         }
 
         external.console <- "false"
@@ -1253,7 +1275,7 @@ setMethod("vcDebug", "BSysProject",
 
         if (nchar(gdb.path) == 0)
         {
-          warning(paste("Cannot find path to gdb. Check that", debug.app, "is accessible via the PATH environment variable."))
+          cat(paste("Cannot find path to gdb. Check that", debug.app, "is accessible via the PATH environment variable.\n"))
         }
       }
 
@@ -1261,7 +1283,7 @@ setMethod("vcDebug", "BSysProject",
 
       if (nchar(gcc.path) == 0)
       {
-        warning("Cannot find path to gcc. Check that gcc is accessible via the PATH environment variable.")
+        cat("Cannot find path to gcc. Check that gcc is accessible via the PATH environment variable.\n")
       }
 
       # build intellisense include paths
@@ -1417,7 +1439,7 @@ setMethod("vcDebug", "BSysProject",
 
       if (is(tr, "try-error"))
       {
-        warning("Cannot find Visual Studio Code. Please ensure it is installed.")
+        cat("Cannot find Visual Studio Code. Please ensure it is installed.\n")
       } 
     }
     else
