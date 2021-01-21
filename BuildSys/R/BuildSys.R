@@ -4,8 +4,9 @@
 # Implements an R based build system for making and debugging C/C++ dlls
 #
 # By Paavo Jumppanen
-# Copyright (c) 2020, CSIRO Marine and Atmospheric Research
-# All Rights Reserved.
+# Copyright (c) 2020-21, CSIRO Marine and Atmospheric Research
+# License: CSIRO OPEN SOURCE SOFTWARE LICENCE
+#   See file COPYING for more details.
 # -----------------------------------------------------------------------------
 
 

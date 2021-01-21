@@ -1,12 +1,17 @@
 Package: BuildSys
 Type: Package
-Title: System for Building and Debugging C/C++ Dynamic Libraries in R
+Title: System for Building and Debugging C/C++ Dynamic Libraries
 Version: 1.0.5
 Date: 2020-07-27
-Author: Paavo Jumppanen
+Authors@R: c(person("Paavo","Jumppanen",role=c("aut","cre"),email="paavo.jumppanen@csiro.au"))
 Maintainer: Paavo Jumppanen <paavo.jumppanen@csiro.au>
-Description: A build system based on GNU make that creates and
+Author: Paavo Jumppanen [aut, cre]
+Copyright: See the file COPYING
+Description: A build system based on 'GNU make' that creates and
     maintains (simply) make files in an R session and provides
-    GUI debugging support through Microsoft Visual Code.
-License: GPL-2
+    GUI debugging support through 'Microsoft Visual Code'.
+License: CSIRO OPEN SOURCE SOFTWARE LICENCE
+URL: https://github.com/pjumppanen/BuildSys
+BugReports: https://github.com/pjumppanen/BuildSys/issues
 Imports: methods, digest
+SystemRequirements:'Microsoft Visual Code', 'Rtools' on 'Windows', 'gdb' or 'lldb' depending on which OS
