@@ -34,13 +34,13 @@ simpler.
 Finally, a major part of developing library code is debugging and standard \emph{R} provides little support
 for that. Developers typically rely on \emph{gdb / lldb} command line driven debugger support, which is
 daunting for an inexperienced user, so much so that many will simply resort to print statement based
-debugging approaches, which whilst capable of resolving bugs is a cumbersome and slow approach. What
+debugging approaches, which whilst capable of resolving bugs, is a cumbersome and slow approach. What
 is required is an easy to use and full featured GUI based debugger and to that end, \emph{Microsoft Visual Code}
 coupled with the machine interface (/MI) support in \emph{gdb / lldb} provide the perfect solution.
 
 \code{BuildSys} provides a simple but complete and flexible way to create project makefiles, build libraries
 and launch GUI based debug sessions, all from within \emph{R}. The makefiles it creates are permanent rather
-than transitory so in the event of build troubles it is east to resort to tinkering with the makefile
+than transitory so in the event of build troubles it is easy to resort to tinkering with the makefile
 to resolve the cause of the build problem and then reflect the necessary fixes in the \emph{R} based project
 definition.
 
@@ -56,7 +56,7 @@ In searching for source files it will also scan the found source files for inclu
 will be saved as dependencies for the give source file. No attempt is made to properly parse the source so
 if the code uses conditional preprocessing statements the situation may arrise that an include file is
 marked as a dependency when for the given build configuration it may not be. In any case, this will not
-affect the ability to correctly build the library but just means the dependencies are marked wider than true.
+affect the ability to correctly build the library but will just mean the dependencies are marked wider than true.
 
 Another feature of the dependency check is that any include files not found are considered externalities and
 if they belong to a known set, will result in the automatic addition of library and include path dependencies
@@ -117,7 +117,7 @@ as the library is already present and up to date. If a source file is altered th
 dependencies will be recompiled and linked into a new dynamic library build.
 
 Internally \code{make} will call the \code{buildMakefile} method to first construct an up to date makefile representing
-the project. Each makefile has a \emph{md5 digest} in it which will be updated should you alter the project at all and
+the project. Each makefile has an \emph{md5 digest} in it which will be updated should you alter the project at all and
 this stamp is then used to determine if the makefile needs re-construction. If the makefile is re-constructed during
 a call to \code{make} then a make clean operation will be carried out to ensure the entire project is re-built. This
 should ensure that the state of the project, makefile and the build remains in sync.
@@ -177,7 +177,7 @@ the same environment (including loaded packages and loaded dynamic libraries) as
 called. This \emph{R} session is your \emph{sandbox} to safely debug your library in and leaves the parent \emph{R} session safe from loss should
 your code crash \emph{R} completely.
 
-Typically when debugging a new library the library requires \emph{R} setup code to initialise as a basis for running some for of library testing.
+Typically when debugging a new library the library requires \emph{R} setup code to initialise as a foundation for library use and/or testing.
 With \code{BuildSys} you should perform this initial setup of \emph{R} in the parent \emph{R} session before calling \code{vcDebug} so that you
 never have to initialise \emph{R} in your debug session. Its correct state will have been initialised from the parent \emph{R} session.
 }
