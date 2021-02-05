@@ -370,14 +370,18 @@ setMethod("initProjectFromFolder", "BSysProject",
                                "}",
                                "")
 
-        AbortSourceFilePath <- paste0(SrcFolder, "abort.cpp")
-        abortSourceFile     <- file(AbortSourceFilePath, "wt")
-        writeLines(AbortOverrideCode, abortSourceFile)
-        close(abortSourceFile)
+        AbortSourceFilePath <- paste0(SrcFolder, "bsys_abort.cpp")
 
-        SourceFile <- new("BSysSourceFile", "abort.cpp", SrcFolder, IncludeFolder, "cpp")
+        if (!file.exists(AbortSourceFilePath))
+        {
+          abortSourceFile <- file(AbortSourceFilePath, "wt")
+          writeLines(AbortOverrideCode, abortSourceFile)
+          close(abortSourceFile)
+        }
 
-        CodeProject@SourceFiles[[length(.Object@SourceFiles) + 1]] <- SourceFile 
+        SourceFile <- new("BSysSourceFile", "bsys_abort.cpp", SrcFolder, IncludeFolder, "cpp")
+
+        CodeProject@SourceFiles[[length(.Object@SourceFiles) + 1]] <- SourceFile
       }
 
       return (CodeProject)
@@ -457,12 +461,16 @@ setMethod("initProjectFromFolder", "BSysProject",
     
     testFolder(SrcFolder)
     testFolder(IncludeFolder)
-    
+
     AllFiles      <- dir(SrcFolder)
 
     for (File in AllFiles)
     {
-      if (grepl("\\.c$", File))
+      if (grepl("bsys_abort.cpp$", File))
+      {
+        # ignore as this is auto-created and will be re-created
+      }
+      else if (grepl("\\.c$", File))
       {
         # c source file
         SourceFile <- new("BSysSourceFile", File, SrcFolder, IncludeFolder, "c")
@@ -1098,11 +1106,15 @@ setMethod("clean", "BSysProject",
     RprofileFolder        <- paste(sourcePath(.Object), .Object@ProjectName, ".Rprof", sep="")
     debugProjectPath      <- paste(RprofileFolder, "/", .Object@ProjectName, "_DebugProject.RData", sep="")
     debugSessionPath      <- paste(RprofileFolder, "/", .Object@ProjectName, "_DebugSession.RData", sep="")
+    debugCmdTxtPath       <- paste(RprofileFolder, "/debugCmd.txt", sep="")
     Rprofile.path         <- paste(RprofileFolder, "/.Rprofile", sep="")
+    bsysAbortPath         <- paste(sourcePath(.Object), "bsys_abort.cpp", sep="")
 
     unlink(debugProjectPath)
     unlink(debugSessionPath)
     unlink(Rprofile.path)
+    unlink(bsysAbortPath)
+    unlink(debugCmdTxtPath)
     unlink(RprofileFolder, recursive=TRUE, force=TRUE)
 
     vsCodeFolder          <- paste(sourcePath(.Object), ".vscode", sep="")
@@ -1300,7 +1312,7 @@ setMethod("vcDebug", "BSysProject",
         external.console   <- false
         R.args             <- paste("\"", RprofileFolder, "\"", sep="")
         debug.command.args <- paste("--source", debugCmdFilePath)
-        debug.Cmd.lines    <- c("breakpoint set -f abort.cpp -b abort")
+        debug.Cmd.lines    <- c("breakpoint set -f bsys_abort.cpp -b abort")
       }
       else
       {
@@ -1320,7 +1332,7 @@ setMethod("vcDebug", "BSysProject",
 
         debug.command.args <- paste("--init-command", debugCmdFilePath) 
         debug.Cmd.lines    <- c(debug.Cmd.lines, "set breakpoint pending on",
-                                "break abort.cpp:abort")
+                                "break bsys_abort.cpp:abort")
       }
 
       # write debuggeer command file
