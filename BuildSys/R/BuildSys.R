@@ -267,11 +267,11 @@ setMethod("initProjectFromFolder", "BSysProject",
     {
       if (!dir.exists(Path))
       {
-        cat("The folder", Path, "does not exist.\n")
+        warning("The folder", Path, "does not exist.\n")
       }
     }
 
-    addExternalDependencies <- function(SourceFile, CodeProject)
+    addExternalDependencies <- function(SourceFile, SrcFolder, IncludeFolder, CodeProject)
     {
       if (CodeProject@IsDebug)
       {
@@ -285,21 +285,26 @@ setMethod("initProjectFromFolder", "BSysProject",
       DefLIB_UNLOAD   <- paste("LIB_UNLOAD=R_unload_", CodeProject@ProjectName, sep="")
       DefTMB_LIB_INIT <- paste("TMB_LIB_INIT=R_init_", CodeProject@ProjectName, sep="")
 
-      RcppDep      <- list(pkg="Rcpp",      
+      RcppDep      <- list(pkg="Rcpp",
+                           add.abort=TRUE,      
                            defs=c(DefLIB_UNLOAD), 
                            libs=as.character(c()))
       
       RcppEigenDep <- list(pkg="RcppEigen", 
+                           add.abort=TRUE,      
                            defs=c(DefLIB_UNLOAD), 
                            libs=as.character(c()))
 
       TMBDep       <- list(pkg="TMB",       
+                           add.abort=TRUE,      
                            defs=c(DefTMB_SafeBounds, DefLIB_UNLOAD, DefTMB_LIB_INIT), 
                            libs=as.character(c()))
 
       KnownPackageDependencies <- list(Rcpp.hpp      =list(RcppDep), 
                                        RcppEigen.hpp =list(RcppDep, RcppEigenDep), 
                                        TMB.hpp       =list(TMBDep, RcppDep, RcppEigenDep))
+
+      AddAbort <- FALSE
 
       for (External in SourceFile@Externals)
       {
@@ -309,6 +314,8 @@ setMethod("initProjectFromFolder", "BSysProject",
         {
           for (PackageDependency in PackageDependencies)
           {
+            AddAbort <- AddAbort || PackageDependency$add.abort
+
             if (!PackageDependency$pkg %in% CodeProject@Packages)
             {
               CodeProject@Packages <- c(CodeProject@Packages, PackageDependency$pkg)
@@ -344,6 +351,33 @@ setMethod("initProjectFromFolder", "BSysProject",
         {
           CodeProject@Libraries <- c(CodeProject@Libraries, LibDependency)
         }
+      }
+
+      if (AddAbort)
+      {
+        AbortOverrideCode <- c("//----------------------------------------------",
+                               "// BuildSys standard C library abort() override.", 
+                               "//----------------------------------------------",
+                               "",
+                               "#include <stdexcept>",
+                               "",
+                               "extern \"C\" void abort(void)",
+                               "{",
+                               "  // If you are here then your code has called abort.", 
+                               "  // We throw bad_alloc() cos that is what is caught in TMB,",
+                               "  // Rcpp and RcppEigen exception handling.", 
+                               "  throw std::bad_alloc();",
+                               "}",
+                               "")
+
+        AbortSourceFilePath <- paste0(SrcFolder, "abort.cpp")
+        abortSourceFile     <- file(AbortSourceFilePath, "wt")
+        writeLines(AbortOverrideCode, abortSourceFile)
+        close(abortSourceFile)
+
+        SourceFile <- new("BSysSourceFile", "abort.cpp", SrcFolder, IncludeFolder, "cpp")
+
+        CodeProject@SourceFiles[[length(.Object@SourceFiles) + 1]] <- SourceFile 
       }
 
       return (CodeProject)
@@ -471,7 +505,7 @@ setMethod("initProjectFromFolder", "BSysProject",
     # This step needs to happen after setting ProjectName
     for (SourceFile in .Object@SourceFiles)
     {
-      .Object <- addExternalDependencies(SourceFile, .Object)
+      .Object <- addExternalDependencies(SourceFile, SrcFolder, IncludeFolder, .Object)
     }
 
     return (.Object)
@@ -1034,7 +1068,7 @@ setMethod("unloadLibrary", "BSysProject",
 
     if (!is(tr, "try-error")) 
     {
-      cat("Note: Library", libPath, "was unloaded.\n")
+      message("Note: Library", libPath, "was unloaded.\n")
     }
   }
 )
@@ -1154,8 +1188,9 @@ setMethod("vcDebug", "BSysProject",
   function(.Object, LaunchEditor=TRUE)
   {
     RprofileFolder   <- paste(sourcePath(.Object), .Object@ProjectName, ".Rprof", sep="")
-    debugProjectPath <- paste(RprofileFolder, "/", .Object@ProjectName, "_DebugProject.RData", sep="")
-    debugSessionPath <- paste(RprofileFolder, "/", .Object@ProjectName, "_DebugSession.RData", sep="")
+    debugProjectPath <- paste(RprofileFolder, "/DebugProject.RData", sep="")
+    debugSessionPath <- paste(RprofileFolder, "/DebugSession.RData", sep="")
+    debugCmdFilePath <- paste(RprofileFolder, "/debugCmd.txt", sep="")
     Rprofile.path    <- paste(RprofileFolder, "/.Rprofile", sep="")
 
     if (LaunchEditor)
@@ -1188,7 +1223,7 @@ setMethod("vcDebug", "BSysProject",
         }
         else
         {
-          cat(paste("Unsupported intellisense target:", OS,"\n"))
+          warning(paste("Unsupported intellisense target:", OS,"\n"))
         }
 
         if (Architecture =="x86-64")
@@ -1206,7 +1241,7 @@ setMethod("vcDebug", "BSysProject",
         }
         else
         {
-          cat("Unknown intellisense architecture\n")
+          warning("Unknown intellisense architecture\n")
         }
 
         return (list(TargetName=TargetName, Architecture=Architecture, Mode=Mode, normPath=ShortPath))
@@ -1221,7 +1256,7 @@ setMethod("vcDebug", "BSysProject",
       }
       else if (!file.attr$isdir)
       {
-        cat(paste("Cannot create", RprofileFolder, "folder as .vscode file exists.\n"))
+        warning(paste("Cannot create", RprofileFolder, "folder as .vscode file exists.\n"))
       }
 
       # create .vscode folder if needed
@@ -1235,12 +1270,14 @@ setMethod("vcDebug", "BSysProject",
       }
       else if (!file.attr$isdir)
       {
-        cat("Cannot create .vscode folder as .vscode file exists.\n")
+        warning("Cannot create .vscode folder as .vscode file exists.\n")
       }
 
-      debug.app        <- "gdb"
-      external.console <- "true"
-      R.args           <- "\"--no-save\", \"--no-restore\""
+      debug.app          <- "gdb"
+      external.console   <- "true"
+      R.args             <- "\"--no-save\", \"--no-restore\""
+      debug.command.args <- ""
+      debug.Cmd.lines    <- c()
 
       # get needed paths
       if (IsDarwin)
@@ -1249,7 +1286,7 @@ setMethod("vcDebug", "BSysProject",
 
         if (!file.exists(R.path))
         {
-          cat("Cannot find R.\n")
+          warning("Cannot find R.\n")
         }
         
         gdb.path  <- "/Applications/Xcode.app/Contents/Developer/usr/bin/lldb-mi"
@@ -1257,11 +1294,13 @@ setMethod("vcDebug", "BSysProject",
 
         if (!file.exists(gdb.path))
         {
-          cat("Cannot find lldb-mi. Ensure Xcode is installed.\n")
+          warning("Cannot find lldb-mi. Ensure Xcode is installed.\n")
         }
 
-        external.console <- "false"
-        R.args           <- paste("\"", RprofileFolder, "\"", sep="")
+        external.console   <- false
+        R.args             <- paste("\"", RprofileFolder, "\"", sep="")
+        debug.command.args <- paste("--source", debugCmdFilePath)
+        debug.Cmd.lines    <- c("breakpoint set -f abort.cpp -b abort")
       }
       else
       {
@@ -1276,15 +1315,24 @@ setMethod("vcDebug", "BSysProject",
 
         if (nchar(gdb.path) == 0)
         {
-          cat(paste("Cannot find path to gdb. Check that", debug.app, "is accessible via the PATH environment variable.\n"))
+          warning(paste("Cannot find path to gdb. Check that", debug.app, "is accessible via the PATH environment variable.\n"))
         }
+
+        debug.command.args <- paste("--init-command", debugCmdFilePath) 
+        debug.Cmd.lines    <- c(debug.Cmd.lines, "set breakpoint pending on",
+                                "break abort.cpp:abort")
       }
+
+      # write debuggeer command file
+      debugCmdfile <- file(debugCmdFilePath, "wt")
+      writeLines(debug.Cmd.lines, debugCmdfile)
+      close(debugCmdfile)
 
       gcc.path <- normalizePath(Sys.which("gcc"), "/", mustWork=FALSE)
 
       if (nchar(gcc.path) == 0)
       {
-        cat("Cannot find path to gcc. Check that gcc is accessible via the PATH environment variable.\n")
+        warning("Cannot find path to gcc. Check that gcc is accessible via the PATH environment variable.\n")
       }
 
       # build intellisense include paths
@@ -1313,7 +1361,7 @@ setMethod("vcDebug", "BSysProject",
         gcc.include           <- sub("/bin/gcc.*", "/include", gcc.path)
         intellisense.includes <- paste(intellisense.includes, ",\"", gcc.include, "/**\"", sep="")
 
-        root.include <- paste(rtools.path, "usr/include", sep="")
+        root.include      <- paste(rtools.path, "usr/include", sep="")
         root.user.include <- paste(rtools.path, "usr/local/include", sep="")
 
         if (file.exists(root.include))
@@ -1379,12 +1427,13 @@ setMethod("vcDebug", "BSysProject",
       paste("      \"targetArchitecture\":\"", intellisense.info$Architecture,"\",", sep=""),
       paste("      \"program\": \"", normPath(R.path), "\",", sep=""),
       paste("      \"args\": [", R.args, "],", sep=""),
-      "      \"stopAtEntry\": false,",
+      "      \"stopAtEntry\": true,", # This is needed to ensure that debugger command file breakpoints are activated in a session
       paste("      \"cwd\": \"", normPath(RprofileFolder), "\",", sep=""),
       paste("      \"environment\": [{\"name\":\"R_HOME\",\"value\":\"",R.home(),"\"}],", sep=""),
       paste("      \"externalConsole\": ", external.console, ",", sep=""),
       paste("      \"MIMode\": \"", debug.app, "\",", sep=""),
       paste("      \"miDebuggerPath\": \"", normPath(gdb.path), "\",", sep=""),
+      paste("      \"miDebuggerArgs\": \"", debug.command.args, "\",", sep=""),     
       "      \"setupCommands\": [",
       "        {",
       paste("          \"description\": \"Enable pretty-printing for ", debug.app, "\",", sep=""),
@@ -1440,7 +1489,7 @@ setMethod("vcDebug", "BSysProject",
 
       if (is(tr, "try-error"))
       {
-        cat("Cannot find Visual Studio Code. Please ensure it is installed.\n")
+        warning("Cannot find Visual Studio Code. Please ensure it is installed.\n")
       } 
     }
     else
