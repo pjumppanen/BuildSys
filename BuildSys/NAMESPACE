@@ -1,6 +1,5 @@
 importFrom("digest", "digest")
 importFrom("methods", "is", "new")
-importFrom("utils", "shortPathName")
 export("initProjectFromFolder",
        "buildMakefile",
        "make",
