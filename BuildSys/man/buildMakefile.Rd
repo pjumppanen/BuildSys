@@ -19,7 +19,7 @@
   }
 }
 \details{
-  \code{buildMakefile} constructs a makefile that represents the project specfication in the in the S4 \code{BSysProject} object instance.
+  \code{buildMakefile} constructs a makefile that represents the project specfication in the S4 \code{BSysProject} object instance.
   That instance is created with a call to \code{new("BSysProject", ...)} constructor (see \code{\link{initProjectFromFolder}}). If the makefile
   already exists and is in sync with \code{Object} then the makefile is left untouched, unless \code{Force=TRUE}, in which case it is written afresh.
   A makefile is determined to be in sync with the parent project by comparison of an \emph{md5 digest} of the \code{BSysProject} object instance

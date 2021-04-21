@@ -33,9 +33,10 @@
   called. This \emph{R} session is your \emph{sandbox} to safely debug your library in and leaves the parent \emph{R} session safe from loss should
   your code crash \emph{R} completely.
 
-  Typically when debugging a new library the library requires \emph{R} setup code to initialise as a foundation for library use and/or testing.
-  With \code{BuildSys} you should perform this initial setup of \emph{R} in the parent \emph{R} session before calling \code{vcDebug} so that you
-  never have to initialise \emph{R} in your debug session. Its correct state will have been initialised from the parent \emph{R} session.
+  Debugging a new library will typically require some \emph{R} setup code to be executed before using and/or testing it. With \code{BuildSys} you 
+  should perform this initial setup of \emph{R} in the parent \emph{R} session before calling \code{vcDebug} so that you never have to initialise 
+  \emph{R} in your debug session. The debug \emph{R} session will inherit the state of the parent \emph{R} session at the time that \code{vcDebug} 
+  was called.
 }
 \value{
   this method returns no value.

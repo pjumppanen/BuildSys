@@ -36,7 +36,7 @@
   operation will be automatically carried out to ensure the built library remains in sync with the makefile.
 }
 \value{
-  This method returns an updated S4 \code{BSysProject} object instance. If the any change to \code{Debug} state is to be preseverved then the
+  This method returns an updated S4 \code{BSysProject} object instance. If the any change to \code{Debug} state is to be preserved then the
   returned result should be assigned to the calling \code{BSysProject} object instance passed in the \code{Object} argument.
 }
 \author{

@@ -27,8 +27,9 @@ Objects can be created by calls of the form:
 
 \preformatted{
   new("BSysProject", 
+      WorkingFolder,
       Name, 
-      WorkingFolder, 
+      SourceFiles, 
       SourceName, 
       IncludeName, 
       ObjName, 
@@ -51,11 +52,11 @@ For more information consult \code{\link{initProjectFromFolder}}.
 }
 \section{Slots}{
   \describe{
-    \item{\code{ProjectName}:}{
-      Object of class \code{"character"} that is the name given to the project and will form the basename of the shared library.
-    }
     \item{\code{WorkingFolder}:}{
       Object of class \code{"character"} that is the absolute path to the root folder of the project.
+    }
+    \item{\code{ProjectName}:}{
+      Object of class \code{"character"} that is the name given to the project and will form the basename of the shared library.
     }
     \item{\code{SourceName}:}{
       Object of class \code{"character"} that is the sub-path / sub-drectory of the source folder (containing \code{.c}, \code{.cpp} files)

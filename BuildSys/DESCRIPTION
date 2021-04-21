@@ -1,8 +1,8 @@
 Package: BuildSys
 Type: Package
 Title: System for Building and Debugging C/C++ Dynamic Libraries
-Version: 1.0.5
-Date: 2020-07-27
+Version: 1.0.7
+Date: 2021-04-21
 Authors@R: c(person("Paavo","Jumppanen",role=c("aut","cre"),email="paavo.jumppanen@csiro.au"))
 Maintainer: Paavo Jumppanen <paavo.jumppanen@csiro.au>
 Author: Paavo Jumppanen [aut, cre]

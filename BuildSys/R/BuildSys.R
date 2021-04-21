@@ -157,8 +157,9 @@ setClass("BSysProject",
 # -----------------------------------------------------------------------------
 setMethod("initialize", "BSysProject",
   function(.Object, 
+           WorkingFolder=NULL, 
            Name="",
-           WorkingFolder="", 
+           SourceFiles=NULL,
            SourceName="src",
            IncludeName="include",
            ObjName="obj",
@@ -200,8 +201,9 @@ setMethod("initialize", "BSysProject",
     .Object@DebugState          <- list()
 
     return (initProjectFromFolder(.Object,
+                                  WorkingFolder,
                                   Name, 
-                                  WorkingFolder, 
+                                  SourceFiles, 
                                   SourceName,
                                   IncludeName,
                                   ObjName,
@@ -230,8 +232,9 @@ setGeneric("initProjectFromFolder", function(.Object, ...) standardGeneric("init
 
 setMethod("initProjectFromFolder", "BSysProject",
   function(.Object, 
+           WorkingFolder=NULL,
            Name="",
-           WorkingFolder="", 
+           SourceFiles=NULL, 
            SourceName="src",
            IncludeName="include",
            ObjName="obj",
@@ -250,6 +253,11 @@ setMethod("initProjectFromFolder", "BSysProject",
            DEFINES=as.character(c()), 
            Debug=TRUE)
   {
+    if (is.null(WorkingFolder))
+    {
+      stop("WorkingFolder not specified. Please specify a WorkingFolder.")
+    }
+    
     if (Sys.info()["sysname"] == "Windows")
     {
       RLIBPATH <- R.home("bin")
@@ -462,7 +470,14 @@ setMethod("initProjectFromFolder", "BSysProject",
     testFolder(SrcFolder)
     testFolder(IncludeFolder)
 
-    AllFiles      <- dir(SrcFolder)
+    if (is.null(SourceFiles))
+    {
+      AllFiles <- dir(SrcFolder)
+    }
+    else 
+    {
+      AllFiles <- SourceFiles
+    }
 
     for (File in AllFiles)
     {
@@ -517,6 +532,21 @@ setMethod("initProjectFromFolder", "BSysProject",
     }
 
     return (.Object)
+  }
+)
+
+
+# -----------------------------------------------------------------------------
+# Method to supress printing entire object 
+# -----------------------------------------------------------------------------
+setMethod("show", "BSysProject",
+  function(object)
+  {
+    cat(paste("BuildSys Project:", 
+              object@ProjectName, 
+              "\nWorking Folder:",
+              object@WorkingFolder,
+              "\n"))
   }
 )
 
@@ -1309,7 +1339,7 @@ setMethod("vcDebug", "BSysProject",
           warning("Cannot find lldb-mi. Ensure Xcode is installed.\n")
         }
 
-        external.console   <- false
+        external.console   <- "false"
         R.args             <- paste("\"", RprofileFolder, "\"", sep="")
         debug.command.args <- paste("--source", debugCmdFilePath)
         debug.Cmd.lines    <- c("breakpoint set -f bsys_abort.cpp -b abort")
@@ -1413,7 +1443,7 @@ setMethod("vcDebug", "BSysProject",
       }
 
       # create debugRprofile.txt environment setup file for gdb debug session
-      working.dir <- getwd()
+      working.dir <- .Object@WorkingFolder
 
       Rprofile_lines <- c(
       paste("require(BuildSys)", sep=""),

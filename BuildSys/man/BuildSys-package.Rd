@@ -49,9 +49,9 @@ definition.
 To create a new project we simply create a new instance of that class and \code{BuildSys} will construct
 the appropriate project definition. For example,
 
-\code{Project <- new("BSysProject")}
+\code{Project <- new("BSysProject", "./MyFolder")}
 
-will search the \emph{R} working directory for source files (\code{.c, .cpp} etc) and add them to the project definition.
+will search the directory \code{./MyFolder} for source files (\code{.c, .cpp} etc) and add them to the project definition.
 In searching for source files it will also scan the found source files for include statements and any found includes
 will be saved as dependencies for the give source file. No attempt is made to properly parse the source so
 if the code uses conditional preprocessing statements the situation may arrise that an include file is
@@ -63,23 +63,21 @@ if they belong to a known set, will result in the automatic addition of library 
 for the project. Currently \code{BuildSys} knows about \code{TMB.hpp, Rcpp.hpp} and \code{RcppEigen.hpp}, so if any of these are
 included into the source file then the necessary include file and define dependencies will be added. This added
 feature means \emph{TMB} and \emph{Rcpp} users have minimalistic usage requirements to construct libraries with \code{BuildSys} and
-need not provide any additional information other than the source files being compiled.
+need not provide any additional information other than the working folder and possibly the source files being compiled.
 
 A typical project will also need to be given a name but if there is only one source file then the name
 can be omitted and is inferred from the filename of the source file. For instance, we can explicitly
 name the project with,
 
-\code{Project <- new("BSysProject", Name="MyProject")}
+\code{Project <- new("BSysProject", WorkingFolder="./MyFolder", Name="MyProject")}
 
-If our source code resides in a different folder we can specify that as well, either as an absolute path or one
-relative to the \emph{R} working directory. For example,
-
-\code{Project <- new("BSysProject", Name="MyProject", WorkingFolder="MyFolder")}
+A \code{WorkingFolder} must be provided which names the folder where the source code resides and can be either an absolute path or one
+relative to the \emph{R} working directory. 
 
 Finally, if our project is hierarchical in its structure (eg. having source in one folder, header files in another folder,
 and binary output in yet another) \code{BuildSys} can accomodate that too. In such case we set \code{Flat=FALSE} with,
 
-\code{Project <- new("BSysProject", Name="MyProject", WorkingFolder="MyFolder", Flat=FALSE)}
+\code{Project <- new("BSysProject", WorkingFolder="./MyFolder", Name="MyProject", Flat=FALSE)}
 
 For this case the relevent folders are,
 
@@ -93,12 +91,12 @@ These sub folder names are the default behaviour. If these sub folder names are 
 using the \code{SourceName}, \code{IncludeName} and \code{ObjName} arguments in the \code{BSysProject} initilizer.
 That is,
 
-\code{Project <- new("BSysProject", Name="MyProject", WorkingFolder="MyFolder", Flat=FALSE, SourceName="source", IncludeName="header")}
+\code{Project <- new("BSysProject", WorkingFolder="./MyFolder", Name="MyProject", Flat=FALSE, SourceName="source", IncludeName="header")}
 
 Given an existing project, we can also re-initialize it using the \code{initProjectFromFolder} method which has the same
 argument list as the \code{initialize} method (it is actually called from the \code{initialize} method). For instance, as with the above,
 
-\code{Project <- initProjectFromFolder(Project, Name="MyProject", WorkingFolder="MyFolder", Flat=FALSE, SourceName="source", IncludeName="header")}
+\code{Project <- initProjectFromFolder(Project, WorkingFolder="./MyFolder", Name="MyProject", Flat=FALSE, SourceName="source", IncludeName="header")}
 }
 
 \subsection{Project Compilation}{
@@ -126,7 +124,7 @@ Finally, if your project needs to install the library and/or include files to a 
 catered for in \code{BuildSys}. Simply specify the install locations with the \code{InstallLibraryName} and \code{InstallIncludeName}
 arguments in the \code{BSysProject} initializer. For instance,
 
-\code{Project <- new("BSysProject", Flat=F, InstallLibraryName="inst/lib", InstallIncludeName="inst/include")}
+\code{Project <- new("BSysProject", WorkingFolder="./MyFolder", Flat=F, InstallLibraryName="inst/lib", InstallIncludeName="inst/include")}
 
 }
 
@@ -219,9 +217,12 @@ To set environment variables in \emph{Windows 10},
 }
 
 In Windows after installing \emph{Rtools} we also need to install \emph{gdb}. To install \emph{gdb}, open an \emph{MSYS2} shell (In explorer migrate to the Rtools40 folder
-and double click on \emph{msys2.exe}) and enter the following command,
+and double click on \emph{msys2.exe}) and enter the following commands,
 
-\code{pacman -S mingw-w64-x86_64-gdb}
+\preformatted{
+pacman -Sy
+pacman -S mingw-w64-{i686,x86_64}-gdb
+}
 
 After installing verify that \emph{gdb} is installed by opening a new \emph{DOS box} and typing,
 
@@ -277,6 +278,8 @@ To ensure code is debuggable users will need to avoid putting code in folders wi
 }
 
 \examples{
+ProjectFolder <- tempdir()
+
 # Create source file for finite convolution example in "Writing R Extensions"  
 lines <- c(
 "#include <R.h>",
@@ -300,7 +303,8 @@ lines <- c(
 "    return ab;",
 "}")  
 
-writeLines(lines, "convolve.c")
+SourceFilePath <- paste0(ProjectFolder, "/convolve.c")
+writeLines(lines, SourceFilePath)
 
 # digest need not be loaded but the digest package needs to be installed
 # as it is used to create a digest of the project to track the need for
@@ -308,13 +312,13 @@ writeLines(lines, "convolve.c")
 require(BuildSys)
 
 # create project to build shared library, a flat project with source in current working directory. 
-Project <- new("BSysProject")
+Project <- new("BSysProject", ProjectFolder)
 
 # re-initialise project from current working directory, new("BSysProject") calls this internally
-Project <- initProjectFromFolder(Project)
+Project <- initProjectFromFolder(Project, ProjectFolder)
 
 # build the shared library
-Project <- make(Project)
+make(Project)
 
 # get project library path
 libraryPath(Project)
@@ -347,6 +351,7 @@ b <- rep(1.0, times=10)
 # call the shared library function
 conv(a, b)
 
+\dontrun{
 # open a debug session - assumes Visual Studio Code is installed as directed in the 
 # package documentation. This will open a Visual Studio Code session. In that session
 # open the convolve.c source file and set breakpoints, then select the "run/start debugging"
@@ -356,14 +361,15 @@ conv(a, b)
 #
 # conv(a, b)
 vcDebug(Project)
+}
 
 # unload the shared library
 unloadLibrary(Project)
 
 # clean up example
-Project <- make(Project, "clean")
+make(Project, "clean")
 clean(Project)
-unlink("convolve.c")
+unlink(SourceFilePath)
 }
 
 \keyword{package}

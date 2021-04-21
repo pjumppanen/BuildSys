@@ -12,8 +12,9 @@
 
 \usage{
 \S4method{initProjectFromFolder}{BSysProject}(.Object,
+                      WorkingFolder = "NULL",
                       Name = "",
-                      WorkingFolder = "",
+                      SourceFiles = "NULL",
                       SourceName = "src",
                       IncludeName = "include",
                       ObjName = "obj",
@@ -37,11 +38,15 @@
   \item{.Object}{
 \code{.Object} is an S4 object instance of class \code{BSysProject} that the code project will be based off.
 }
+  \item{WorkingFolder}{
+The path to the root folder of the project, either relative or absolute and must be supplied.
+}
   \item{Name}{
 The name given to the project and will form the basename of the shared library.
 }
-  \item{WorkingFolder}{
-The path to the root folder of the project, either relative or absolute.
+  \item{SourceFiles}{
+The a list of file names in WorkingFolder that should be compiled as part of the project or \code{NULL}. If \code{NULL} 
+then all compilable source files in WorkingFolder are included. 
 }
   \item{SourceName}{
 The sub-path / sub-drectory of the source folder (containing \code{.c}, \code{.cpp} files) in the project.
@@ -101,10 +106,14 @@ A \code{Boolean} that indicates whether to create a debug build
 }
 \details{
 \code{initProjectFromFolder} constructs a project specification by scanning the \code{WorkingFolder}
-and relevant \code{sourceName} sub path for source files to add to the project. Any \code{.c}, \code{.cpp}
-and \code{.f} files it finds are added to the project. Any added files are scanned for include directives
-and those includes are added as project dependencies. If the dependency is not found in the path described
-by the \code{includeName} it is regarded as an external dependency.
+and relevant \code{sourceName} sub path for source files to add to the project. If the \code{SourceFiles}
+is included the the source file scan is omitted and only the named source files included. The named files
+are assumed relative to the Working Folder so if a hierarchical project is being created then the relative
+path to the source folder will need to be included in the \code{SourceFiles} list. Any \code{.c}, \code{.cpp}
+and \code{.f} files it finds are added to the project. In the case of Fortran files the following extensions
+are scanned; \code{.f}, \code{.for}, \code{.f90}, \code{.f95} and \code{.f77}. Any added files are scanned 
+for include directives and those includes are added as project dependencies. If the dependency is not found 
+in the path described by the \code{includeName} it is regarded as an external dependency.
 
 If the external dependency is known (\code{TMB.hpp} for example) then the appropriate \code{Includes},
 \code{Defines} and \code{Libraries} are added to the project definition. \code{BuildSys} is currently
