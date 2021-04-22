@@ -1250,7 +1250,7 @@ setMethod("vcDebug", "BSysProject",
         {
           TargetName <- "Win32"
           Mode       <- "gcc"    
-          ShortPath  <- function(arg) {gsub("\\\\", "/", shortPathName(arg))}
+          ShortPath  <- function(arg) {gsub("\\\\", "/", utils::shortPathName(arg))}
         }
         else if (OS == "Linux")
         {
