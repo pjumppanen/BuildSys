@@ -1,5 +1,5 @@
 importFrom("digest", "digest")
-import("methods", "is", "new")
+importFrom("methods", "is", "new")
 import("utils")
 export("initProjectFromFolder",
        "buildMakefile",
