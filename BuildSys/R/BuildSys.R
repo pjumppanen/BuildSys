@@ -1323,7 +1323,8 @@ setMethod("vcDebug", "BSysProject",
       # get needed paths
       if (IsDarwin)
       {
-        R.path <- "/Applications/R.app/Contents/MacOS/R"        
+        VisualStudioCode <- "open -a Visual\\ Studio\\ Code.app --args"
+        R.path           <- "/Applications/R.app/Contents/MacOS/R"        
 
         if (!file.exists(R.path))
         {
@@ -1345,7 +1346,8 @@ setMethod("vcDebug", "BSysProject",
       }
       else
       {
-        R.path <- normalizePath(Sys.which("Rgui"), "/", mustWork=FALSE)
+        VisualStudioCode <- "code"
+        R.path           <- normalizePath(Sys.which("Rgui"), "/", mustWork=FALSE)
 
         if (nchar(R.path) == 0)
         {
@@ -1526,11 +1528,11 @@ setMethod("vcDebug", "BSysProject",
       save.image(file=debugSessionPath)
 
       # spawn Visual Studio Code
-      tr <- try(system(paste("code \"", sourcePath(.Object) ,".\"", sep=""), wait=FALSE), silent=TRUE)
+      tr <- try(system(paste(VisualStudioCode, " \"", sourcePath(.Object) ,".\"", sep=""), wait=FALSE), silent=TRUE)
 
       if (is(tr, "try-error"))
       {
-        warning("Cannot find Visual Studio Code. Please ensure it is installed.\n")
+        warning("Cannot find Visual Studio Code. Please ensure it is installed and reachable through the PATH environment variable.\n")
       } 
     }
     else

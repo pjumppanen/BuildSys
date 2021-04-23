@@ -186,13 +186,15 @@ here:
 
 \href{https://code.visualstudio.com/download}{Download Visual Studio Code}
 
-Choose the appropriate installer for your operating system. The installer should include \emph{code} in the \code{PATH} environment variable.
+Choose the appropriate installer for your operating system. On Windows and Linux the installer should include \emph{code} in the \code{PATH} environment variable.
 Verify this by opening a new shell/command prompt and typing,
 
 \code{code}
 
 and enter. If \emph{Visual Code} starts then the \code{PATH} enviroment variable is correctly set. If it fails to start then add it to the
-system \code{PATH} environment variable.
+system \code{PATH} environment variable. 
+
+On MacOS the application name is \code{Visual Studio Code.app} and is an application bundle. For it to be usable by \emph{BuildSys} drag the \emph{Visual Studio Code} application bundle to the \emph{Applications} folder using \emph{Finder}. 
 
 On \emph{Windows} you will have to install \emph{Rtools} which you can find here:
 
