@@ -253,6 +253,19 @@ the \emph{Microsoft C/C++ IntelliSense, debugging, and code browsing} and \emph{
 search for \emph{C/C++} and then click on \emph{Install} beside the \emph{Microsoft C/C++ IntelliSense, debugging, and code browsing} entry in the list,
 then also search for \emph{CodeLLDB} and click on the \emph{Install} next to \emph{Native debugger based on LLDB} in the list.
 }
+
+On \emph{MacOS (OS X 10.11 and later)} \emph{Apple} introduced \emph{System Integrity Protection} which restricts the ability to debug your code from within an R session. 
+To debug code in R using \emph{BuildSys} and \emph{CodeLLDB} will require that the debugging restrictions are disabled. To do so shutdown \emph{MacOS}, then press and hold down \emph{CMD+R}
+keys while pressing the power button and keep them depressed until you see a language selection dialog. After selecting the language you should see
+the \emph{Utilities Window}. In the menu bar at the top of the screen select the \emph{utilities/Terminal} menu and in the terminal session enter
+the follow command:
+
+\preformatted{
+csrutil enable --without debug
+}
+
+You will be prompted for your password. Enter your password to carry out the command. If successful you will be presented with a warning about it being a non-standard configuration. 
+Now re-boot your Mac by selecting the re-boot option from the Apple menu at the top of the screen. You should now be able to debug your R dynamic libraries with \emph{BuildSys}.
 }
 
 \author{
@@ -263,6 +276,8 @@ Maintainer: \packageMaintainer{BuildSys}
 
 \seealso{
 \href{https://code.visualstudio.com/docs/cpp/cpp-debug}{Debug C++ in Visual Studio Code}
+\href{https://developer.apple.com/documentation/security/disabling_and_enabling_system_integrity_protection}{Disabling and Enabling System Integrity Protection}
+\href{https://developer.apple.com/forums/thread/17452}{Enabling parts of System Integrity Protection while disabling specific parts?}
 \code{\link{make}}
 \code{\link{buildMakefile}}
 \code{\link{vcDebug}}
