@@ -307,9 +307,9 @@ setMethod("initProjectFromFolder", "BSysProject",
                            defs=c(DefTMB_SafeBounds, DefLIB_UNLOAD, DefTMB_LIB_INIT), 
                            libs=as.character(c()))
 
-      KnownPackageDependencies <- list(Rcpp.hpp      =list(RcppDep), 
-                                       RcppEigen.hpp =list(RcppDep, RcppEigenDep), 
-                                       TMB.hpp       =list(TMBDep, RcppDep, RcppEigenDep))
+      KnownPackageDependencies <- list(Rcpp.h      =list(RcppDep), 
+                                       RcppEigen.h =list(RcppDep, RcppEigenDep), 
+                                       TMB.hpp     =list(TMBDep, RcppDep, RcppEigenDep))
 
       AddAbort <- FALSE
 
@@ -1458,6 +1458,8 @@ setMethod("vcDebug", "BSysProject",
       writeLines(Rprofile_lines, Rprofile_file)
       close(Rprofile_file)
 
+      StopAtEntry <- "false"
+      
       # create launch.json
       if (IsDarwin)
       {
@@ -1472,7 +1474,7 @@ setMethod("vcDebug", "BSysProject",
         "      \"request\": \"launch\",",
         paste("      \"program\": \"", normPath(R.path), "\",", sep=""),
         paste("      \"args\": [", R.args, "],", sep=""),
-        "      \"stopOnEntry\": false,", 
+        paste("      \"stopOnEntry\": ", StopAtEntry, ",", sep=""), 
         paste("      \"cwd\": \"", normPath(RprofileFolder), "\",", sep=""),
         paste("      \"env\": {\"name\":\"R_HOME\",\"value\":\"",R.home(),"\"},", sep=""),
         paste("      \"initCommands\": [",  paste(sapply(debug.Cmd.lines, function(x) {paste0("\"", x, "\"")}),collapse=","),"]", sep=""),
@@ -1494,7 +1496,7 @@ setMethod("vcDebug", "BSysProject",
         paste("      \"targetArchitecture\":\"", intellisense.info$Architecture,"\",", sep=""),
         paste("      \"program\": \"", normPath(R.path), "\",", sep=""),
         paste("      \"args\": [", R.args, "],", sep=""),
-        "      \"stopAtEntry\": true,", # This is needed to ensure that debugger command file breakpoints are activated in a session
+        paste("      \"stopAtEntry\": ", StopAtEntry, ",", sep=""), 
         paste("      \"cwd\": \"", normPath(RprofileFolder), "\",", sep=""),
         paste("      \"environment\": [{\"name\":\"R_HOME\",\"value\":\"",R.home(),"\"}],", sep=""),
         paste("      \"externalConsole\": ", external.console, ",", sep=""),
