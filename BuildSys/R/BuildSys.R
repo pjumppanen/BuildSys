@@ -1472,10 +1472,10 @@ setMethod("vcDebug", "BSysProject",
         "      \"request\": \"launch\",",
         paste("      \"program\": \"", normPath(R.path), "\",", sep=""),
         paste("      \"args\": [", R.args, "],", sep=""),
-        "      \"stopOnEntry\": true,", # This is needed to ensure that debugger command file breakpoints are activated in a session
+        "      \"stopOnEntry\": false,", 
         paste("      \"cwd\": \"", normPath(RprofileFolder), "\",", sep=""),
         paste("      \"env\": {\"name\":\"R_HOME\",\"value\":\"",R.home(),"\"},", sep=""),
-        paste("      \"initCommands\": [",  paste(sapply(debug.Cmd.lines, function(x) {paste0("\"", x, "\"")}),collapse=","),"\"]", sep=""),
+        paste("      \"initCommands\": [",  paste(sapply(debug.Cmd.lines, function(x) {paste0("\"", x, "\"")}),collapse=","),"]", sep=""),
         "    }",
         "  ]",
         "}")
