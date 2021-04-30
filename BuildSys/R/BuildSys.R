@@ -1331,7 +1331,7 @@ setMethod("vcDebug", "BSysProject",
           warning("Cannot find R.\n")
         }
         
-        gdb.path  <- "/Applications/Xcode.app/Contents/Developer/usr/bin/lldb-mi"
+        gdb.path  <- "/Applications/Xcode.app/Contents/Developer/usr/bin/lldb"
         debug.app <- "lldb"
 
         if (!file.exists(gdb.path))
@@ -1459,34 +1459,59 @@ setMethod("vcDebug", "BSysProject",
       close(Rprofile_file)
 
       # create launch.json
-      launch_lines <- c(
-      "{",
-      "  \"version\": \"0.2.0\",",
-      "  \"configurations\": [",
-      "    {",
-      paste("      \"name\": \"(", debug.app, ") Launch\",", sep=""),
-      "      \"type\": \"cppdbg\",",
-      "      \"request\": \"launch\",",
-      paste("      \"targetArchitecture\":\"", intellisense.info$Architecture,"\",", sep=""),
-      paste("      \"program\": \"", normPath(R.path), "\",", sep=""),
-      paste("      \"args\": [", R.args, "],", sep=""),
-      "      \"stopAtEntry\": true,", # This is needed to ensure that debugger command file breakpoints are activated in a session
-      paste("      \"cwd\": \"", normPath(RprofileFolder), "\",", sep=""),
-      paste("      \"environment\": [{\"name\":\"R_HOME\",\"value\":\"",R.home(),"\"}],", sep=""),
-      paste("      \"externalConsole\": ", external.console, ",", sep=""),
-      paste("      \"MIMode\": \"", debug.app, "\",", sep=""),
-      paste("      \"miDebuggerPath\": \"", normPath(gdb.path), "\",", sep=""),
-      paste("      \"miDebuggerArgs\": \"", debug.command.args, "\",", sep=""),     
-      "      \"setupCommands\": [",
-      "        {",
-      paste("          \"description\": \"Enable pretty-printing for ", debug.app, "\",", sep=""),
-      "          \"text\": \"-enable-pretty-printing\",",
-      "          \"ignoreFailures\": true",
-      "        }",
-      "      ]",
-      "    }",
-      "  ]",
-      "}")
+      if (IsDarwin)
+      {
+        # Configure for CodeLLDB  
+        launch_lines <- c(
+        "{",
+        "  \"version\": \"0.2.0\",",
+        "  \"configurations\": [",
+        "    {",
+        paste("      \"name\": \"(", debug.app, ") Launch\",", sep=""),
+        "      \"type\": \"lldb\",",
+        "      \"request\": \"launch\",",
+        paste("      \"program\": \"", normPath(R.path), "\",", sep=""),
+        paste("      \"args\": [", R.args, "],", sep=""),
+        "      \"stopOnEntry\": true,", # This is needed to ensure that debugger command file breakpoints are activated in a session
+        paste("      \"cwd\": \"", normPath(RprofileFolder), "\",", sep=""),
+        paste("      \"env\": {\"name\":\"R_HOME\",\"value\":\"",R.home(),"\"},", sep=""),
+        paste("      \"initCommands\": [",  paste(sapply(debug.Cmd.lines, function(x) {paste0("\"", x, "\"")}),collapse=","),"\"]", sep=""),
+        "    }",
+        "  ]",
+        "}")
+      }
+      else
+      {
+        # Configure for LLDB-mi  
+        launch_lines <- c(
+        "{",
+        "  \"version\": \"0.2.0\",",
+        "  \"configurations\": [",
+        "    {",
+        paste("      \"name\": \"(", debug.app, ") Launch\",", sep=""),
+        "      \"type\": \"cppdbg\",",
+        "      \"request\": \"launch\",",
+        paste("      \"targetArchitecture\":\"", intellisense.info$Architecture,"\",", sep=""),
+        paste("      \"program\": \"", normPath(R.path), "\",", sep=""),
+        paste("      \"args\": [", R.args, "],", sep=""),
+        "      \"stopAtEntry\": true,", # This is needed to ensure that debugger command file breakpoints are activated in a session
+        paste("      \"cwd\": \"", normPath(RprofileFolder), "\",", sep=""),
+        paste("      \"environment\": [{\"name\":\"R_HOME\",\"value\":\"",R.home(),"\"}],", sep=""),
+        paste("      \"externalConsole\": ", external.console, ",", sep=""),
+        paste("      \"MIMode\": \"", debug.app, "\",", sep=""),
+        paste("      \"miDebuggerPath\": \"", normPath(gdb.path), "\",", sep=""),
+        paste("      \"miDebuggerArgs\": \"", debug.command.args, "\",", sep=""),     
+        "      \"setupCommands\": [",
+        "        {",
+        paste("          \"description\": \"Enable pretty-printing for ", debug.app, "\",", sep=""),
+        "          \"text\": \"-enable-pretty-printing\",",
+        "          \"ignoreFailures\": true",
+        "        }",
+        "      ]",
+        "    }",
+        "  ]",
+        "}")
+      }
 
       launch_file <- file(paste(vsCodeFolder, "/launch.json", sep=""), "wb")
       writeLines(launch_lines, launch_file)

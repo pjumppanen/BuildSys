@@ -240,15 +240,18 @@ This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
 }
 
-On \emph{MacOS / OS X} you will need to install \emph{Xcode} to have access to both clang and lldb. Go to \emph{Mac App Store} and download and install \emph{Xcode}.
+On \emph{MacOS / OS X} you will need to install \emph{Xcode} to have access to both \emph{clang} and \emph{lldb}. Go to \emph{Mac App Store} and download and install \emph{Xcode}.
 
 On \emph{Linux} you will need to have \emph{gcc} installed. Installation of \emph{gcc} on \emph{Linux} is omitted because of the
 many and varied ways to do so depending on the distribution being used. Please consult \emph{Google} on this topic for more information
 on installing development tools on \emph{Linux}.
 
-Finally, you will also need to install the \emph{Microsoft C/C++ IntelliSense, debugging, and code browsing} extension in
-\emph{Microsoft Visual Code}. To install, simply start \emph{Visual Code}, open a C or C++ file and \emph{Visual Code} will
-prompt you about installing the extension. Simply install it when prompted to do so.
+On \emph{Windows} and \emph{Linux}, you will also need to install the \emph{Microsoft C/C++ IntelliSense, debugging, and code browsing} extension in
+\emph{Microsoft Visual Code}. To install, press \emph{Ctrl+Shift+X} and search for \emph{C/C++} and then click on \emph{Install} beside the
+\emph{Microsoft C/C++ IntelliSense, debugging, and code browsing} entry in the list. On \emph{MacOS / OS X} you will need to install
+the \emph{Microsoft C/C++ IntelliSense, debugging, and code browsing} and \emph{CodeLLDB} extensions. To install press \emph{CMD+Shift+X} and 
+search for \emph{C/C++} and then click on \emph{Install} beside the \emph{Microsoft C/C++ IntelliSense, debugging, and code browsing} entry in the list,
+then also search for \emph{CodeLLDB} and click on the \emph{Install} next to \emph{Native debugger based on LLDB} in the list.
 }
 }
 
