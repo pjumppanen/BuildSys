@@ -416,6 +416,8 @@ setMethod("initProjectFromFolder", "BSysProject",
       FullPath <- addSlash(getwd())
     }
 
+    IsSolaris <- grepl('SunOS', Sys.info()['sysname'])
+
     .Object@WorkingFolder       <- FullPath
     .Object@ProjectName         <- Name
     .Object@SourceName          <- ""
@@ -428,7 +430,7 @@ setMethod("initProjectFromFolder", "BSysProject",
     .Object@Packages            <- Packages
     .Object@Includes            <- c(R.home("include"), Includes)
     .Object@Defines             <- Defines
-    .Object@Libraries           <- c(paste(RLIBPATH, "/R", sep=""), Libraries)
+    .Object@Libraries           <- if (IsSolaris) Libraries else c(paste(RLIBPATH, "/R", sep=""), Libraries)
     .Object@CFLAGS              <- CFLAGS
     .Object@CXXFLAGS            <- CXXFLAGS
     .Object@FFLAGS              <- FFLAGS
@@ -863,15 +865,15 @@ setMethod("make", "BSysProject",
       # run make
       if (Operation == "clean")
       {
-        operation <- paste("make -C", quoteArg(ObjFolder), "clean", CaptureCmd)
+        operation <- paste("cd", quoteArg(ObjFolder), "\nmake clean", CaptureCmd)
       } 
       else if (Operation == "install")
       {
-        operation <- paste("make -C", quoteArg(ObjFolder), "install", CaptureCmd)
+        operation <- paste("cd", quoteArg(ObjFolder), "\nmake install", CaptureCmd)
       } 
       else if (Operation == "")
       {
-        operation <- paste("make -C", quoteArg(ObjFolder), CaptureCmd)
+        operation <- paste("cd", quoteArg(ObjFolder), "\nmake", CaptureCmd)
       }
       else
       {
