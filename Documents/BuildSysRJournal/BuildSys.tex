@@ -1,0 +1,141 @@
+% !TeX root = Jumppanen.tex
+\title{Introduction to \pkg{BuildSys}: An R Package for Compiling and Debugging R Dynamic Libraries}
+\author{by Paavo Jumppanen}
+
+\maketitle
+
+\abstract{%
+A powerful feature of R is the ability to make use of dynamically loaded libraries and call functions within (API) through the \code{.C} or \code{.CALL} interface. 
+This allows the more numerically intensive parts of an algorithm to be implemented in efficient compiled code (typically C or FORTRAN), 
+obtaining a significant boost in performance. The flip side of this approach is the complexity and difficulty of compilation, and inparticular,
+the debugging of the compiled code. \pkg{BuildSys} is a package that streamlines and integrates into R, the process of both building and debugging
+dynamically loaded libraries using well established and freely available tools and making debugging in particular, a more pleasant and 
+productive part of the process.  
+}
+
+\hypertarget{introduction}{%
+\subsection{Introduction}\label{introduction}}
+The process of producing functionally correct dynamic libraries for R can be broken down into three processes: (1) code compilation to produce object files,
+(2) linking object files to produce a dynamically library and (3) runtime testing and debugging of the library code. In R steps (1) and (2) 
+are typically handled through the \code{R CMD SHLIB}\citep{SHLIB} mechanism. Internally that mechanism typically relies on \code{GNU make}\citep{GnuMake} which 
+in turn will typically use \code{GCC}\citep{gcc} (on most operating systems) or \code{CLANG/LLVM}\citep{LLVM} (on MacOS). Compilation through \code{R CMD SHLIB} 
+involves the use of a generic makefile bundled within the R installation that makes use of environment variable string substitutions to specify the details 
+of which files and compiler switches are needed. The command itself takes the command line and translates it into a suitable call to GNU make with the correct 
+environment variables to obtain the desired compilation result. This is a simple, effective and portable way to handle compilation of shared 
+libraries within R packages, but for general use in circumstances where there are compile and/or link errors due to makefile mis-configuration 
+(ie. missing include paths, library paths or libraries) it can be challenging to determine the error in the command line specification given when 
+invoking the \code{R CMD SHLIB} command. Furthermore, if the shared library contains many individual source files and makes use of a number of static
+third party libraries the required command line can become unwieldy. For one off library development that is not targetting packaging deployment but 
+simply fulfilling a one off need, it can be easier to combat the build debugging issues of compiling a library by using project specific makefile 
+and GNU make invocation directly rather than going through the \code{R CMD SHLIB} mechanism. \pkg{BuildSys} takes this approach by encapsulating 
+a makefile within an S4 class that is managed from within R. 
+
+The third process in library development, debugging, is the most cumbersome part of currently used approaches and remains a stumbling 
+block for many wishing to develop custom dynamic libraries, but who lack the knowledge and experience to make use of the available debugging 
+tools to do so. The most commonly used debugger is \code{GDB}\citep{GDB}, which provides realtime debugging of the dynamic library within the
+host application (R) via a large set of command line commands invoked at a command prompt. Similarly on MacOS debugging is done using another 
+command line based debugger, \code{LLDB}\citep{LLDB}. 
+
+If users manage to build the library with appropriate debug information included, load the hosting R session and have the debugger find and 
+load the symbol table information and set active breakpoints then they are part way to being able to successfully debug their library. However, 
+one major issue remains that has to do with inspection of variables and other data structures. By default, both \code{GDB} and \code{LLDB} only 
+know how to display intrinsic data types (bool, char, int, double etc.) in a meaningful way via their respective watch commands. To be able to 
+display variables of a complex data type (structures or classes) they both must be provided with custom print code to visualise those complex 
+data types. The default display of complex data types is non-intuitive and difficult to work with in any meaningful way. This only magnifies in 
+cases of indexing arrayed complex data types. It is this limitation that is the fundamental stumbling block for debugging code that leads to 
+resorting to debugging via print statements rather than the employment of a debugger. 
+
+If library developers only rely on native data types then this will not be an issue but to do so implicitely
+requires the use of \code{.C} or \code{.Call} mechanisms directly; see for instance \citep{DotC} and \citep{DotC2}. This requires an intimate
+knowledge of how R internally represents data structures that can be intimidating to the unfamiliar. A more common approach is to 
+use a C++ library that encapsulates the native R data structures within complex data types, of which both \code{GDB} and \code{LLDB} are  
+incapable of visualising in a meaningful way. The most widely used interface wrapper within the R community is \pkg{Rcpp}\citep{RcppIntro},\citep{Rcpp}. 
+The packages \pkg{RcppEigen} and \pkg{TMB} build upon the interface that \pkg{Rcpp} provides to support linear algebra\citep{RcppEigen}, 
+\citep{RcppEigenLA}, automatic differentiation\citep{TMBlaplace} and random effects models\citep{TMB}. The utility of these pakcages alone
+represent a clear motivation for developing support for a more complete debugging experience.
+
+Introductory section which may include references in parentheses
+\citep{R}, or cite a reference such as \citet{R} in the text. \citep{Rcpp}, \citep{RcppEigen}, \citep{TMB}, \citep{Rextensions}
+\citep{DebuggingC_Cpp},\citep{DebuggingRandCcodeinR}, \citep{CodeLLDB-manual}, \citep{CodeLLDB}, \citep{VSCodeTipsTricks}, 
+\citep{VSCodeDownload}, \citep{VSCodeCCppExt}, \citep{VSCodeCCpp}, \citep{GDB}, \citep{ModernDebugging}, \citep{DDD},
+\citep{ImprovingCppDebug},\citep{UsingRtools}, \citep{RcppIntro}, \citep{ihaka:1996}, \citep{RcppEigenLA},
+\citep{TMBlaplace},\citep{DotC},\citep{DotC2},\citep{deSolve},\citep{Routines},\citep{LLDB},
+\citep{Xcode}
+
+\hypertarget{section-title-in-sentence-case}{%
+\subsection{Section title in sentence
+case}\label{section-title-in-sentence-case}}
+
+%This section may contain a figure such as Figure \ref{fig:Rlogo}.
+%
+%\begin{Schunk}
+%\begin{figure}[htbp]
+%
+%{\centering \includegraphics[width=2in]{Rlogo} 
+%
+%}
+
+%\caption[The logo of R]{The logo of R.}\label{fig:Rlogo}
+%\end{figure}
+%\end{Schunk}
+
+%\hypertarget{another-section}{%
+%\subsection{Another section}\label{another-section}}
+
+There will likely be several sections, perhaps including code snippets,
+such as:
+
+%\begin{Schunk}
+%\begin{Sinput}
+%x <- 1:10
+%plot(x)
+%\end{Sinput}
+%
+%\includegraphics{Journal_files/figure-latex/unnamed-chunk-1-1} \end{Schunk}
+%
+%\hypertarget{summary}{%
+%\subsection{Summary}\label{summary}}
+
+This file is only a basic article template. For full details of
+\emph{The R Journal} style and information on how to prepare your
+article for submission, see the
+\href{https://journal.r-project.org/share/author-guide.pdf}{Instructions
+for Authors}.
+
+\hypertarget{about-this-format-and-the-r-journal-requirements}{%
+\subsubsection{About this format and the R Journal
+requirements}\label{about-this-format-and-the-r-journal-requirements}}
+
+\texttt{rticles::rjournal\_article} will help you build the correct
+files requirements:
+
+\begin{itemize}
+\tightlist
+\item
+  A R file will be generated automatically using \texttt{knitr::purl} -
+  see \url{https://bookdown.org/yihui/rmarkdown-cookbook/purl.html} for
+  more information.
+\item
+  A tex file will be generated from this Rmd file and correctly included
+  in \texttt{RJwapper.tex} as expected to build \texttt{RJwrapper.pdf}.
+\item
+  All figure files will be kept in the default rmarkdown
+  \texttt{*\_files} folder. This happens because
+  \texttt{keep\_tex\ =\ TRUE} by default in
+  \texttt{rticles::rjournal\_article}
+\item
+  Only the bib filename is to modifed. An example bib file is included
+  in the template (\texttt{RJreferences.bib}) and you will have to name
+  your bib file as the tex, R, and pdf files.
+\end{itemize}
+
+\bibliography{BuildSysReferences.bib}
+
+\address{%
+Paavo Jumppanen\\
+CSIRO Marine and Atmospheric Research\\%
+Castray Esplanade,\\Battery Point TAS 7004,\\Australia\\
+%
+\url{https://www.csiro.au}%
+\\\href{mailto:paavo.jumppanen@csiro.au}{\nolinkurl{paavo.jumppanen@csiro.au}}
+}
