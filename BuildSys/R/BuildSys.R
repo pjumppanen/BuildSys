@@ -853,14 +853,36 @@ setMethod("make", "BSysProject",
         return (paste0("\"", arg, "\""))
       }
 
+      hasTee <- function()
+      {
+        TestCmd <- "tee --version &>/dev/null"
+
+        # construct test script to see if tee is present
+        BashScript <- c("#!/bin/bash",
+                        TestCmd)
+
+        ScriptFile <- file(ScriptPath, "wt")
+        writeLines(BashScript, ScriptFile)
+        close(ScriptFile)
+
+        command.line <- paste(Sys.which("bash"), quoteArg(ScriptPath))
+        result <- try(system(command.line, wait=TRUE), silent=TRUE)
+        unlink(ScriptFile)
+
+        hasTee <- ((class(result) != "try-error") && (result == 0))
+
+        return (hasTee)
+      }
+
       IsWindows <- (Sys.info()["sysname"] == "Windows")
       DlibName  <- dynlib(.Object@ProjectName)
+      HasTee    <- hasTee()
 
       ObjFolder    <- paste(.Object@WorkingFolder, .Object@ObjName, sep="")
       CapturePath  <- paste(.Object@WorkingFolder, .Object@ProjectName, ".log", sep="")
       ScriptPath   <- paste(.Object@WorkingFolder, .Object@ProjectName, ".sh", sep="")
       FinishedFile <- paste(.Object@WorkingFolder, .Object@ProjectName, ".fin", sep="")
-      CaptureCmd   <- if (IsWindows) paste("2>&1 | tee", quoteArg(CapturePath)) else ""
+      CaptureCmd   <- if (IsWindows && HasTee) paste("2>&1 | tee", quoteArg(CapturePath)) else ""
 
       # run make
       if (Operation == "clean")
@@ -894,7 +916,7 @@ setMethod("make", "BSysProject",
       
       unloadLibrary(.Object)
 
-      if (Sys.info()["sysname"] == "Windows")
+      if (IsWindows && HasTee)
       {
         system(command.line, wait=FALSE, invisible=FALSE)
       }
@@ -915,7 +937,7 @@ setMethod("make", "BSysProject",
       unlink(FinishedFile)
       unlink(ScriptPath)
 
-      if (IsWindows)
+      if (IsWindows && HasTee)
       {
         CaptureFile <- file(CapturePath, "rt")
         writeLines(readLines(CaptureFile))
