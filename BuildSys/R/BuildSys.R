@@ -9,11 +9,68 @@
 # -----------------------------------------------------------------------------
 
 
+pkg.env <- new.env()
+pkg.env$Initialised <- FALSE
+pkg.env$RLibPath    <- ""
+
+
 dynlib <- function(BaseName)
 {
   LibName <- paste(BaseName, .Platform$dynlib.ext, sep="")
 
   return (LibName)
+}
+
+
+# -----------------------------------------------------------------------------
+# Seems some distros of R dont have R lib for some reason and I don't 
+# understand exactly why. This function is an attempt to figure that out 
+# dynamically. 
+# -----------------------------------------------------------------------------
+findRLibPath <- function()
+{
+  if (!pkg.env$Initialised)
+  {
+    OS <- Sys.info()[["sysname"]]
+
+    pkg.env$RLibPath <- ""
+
+    lines          <- c("\n")
+    SourceFilePath <- paste0(tempdir(), "/test.c")
+
+    if (OS == "Windows")
+    {
+      SourceFilePath <- gsub("/", "\\\\", SourceFilePath)
+    }
+
+    writeLines(lines, SourceFilePath)
+
+    command.line <- (paste0("R CMD SHLIB -n ", SourceFilePath))
+    result       <- try(system(command.line, wait=TRUE, intern=TRUE), silent=TRUE)
+
+    unlink(SourceFilePath)
+
+    LibIncludeString <- ""
+
+    for (line in result)
+    {
+      match <- regexpr("\\-L[ \\\\t]*[^ \\\\t]+[ \\\\t]+\\-l[ \\\\t]*[^ \\\\t]+", line)
+
+      if (match >= 0)
+      {
+        LibIncludeString <- substr(line, match, match + attr(match, "match.length") - 1)
+        LibIncludeString <- gsub("\\-L\"", "", LibIncludeString)
+        LibIncludeString <- gsub("\"[ \t]*\\-l", "/", LibIncludeString)
+
+        pkg.env$RLibPath <- LibIncludeString
+        break
+      }
+    }
+
+    pkg.env$Initialised <- TRUE
+  }
+
+  return(pkg.env$RLibPath)
 }
 
 
@@ -416,7 +473,7 @@ setMethod("initProjectFromFolder", "BSysProject",
       FullPath <- addSlash(getwd())
     }
 
-    IsSolaris <- grepl('SunOS', Sys.info()['sysname'])
+#    IsSolaris <- grepl('SunOS', Sys.info()['sysname'])
 
     .Object@WorkingFolder       <- FullPath
     .Object@ProjectName         <- Name
@@ -430,7 +487,8 @@ setMethod("initProjectFromFolder", "BSysProject",
     .Object@Packages            <- Packages
     .Object@Includes            <- c(R.home("include"), Includes)
     .Object@Defines             <- Defines
-    .Object@Libraries           <- if (IsSolaris) Libraries else c(paste(RLIBPATH, "/R", sep=""), Libraries)
+#    .Object@Libraries           <- if (IsSolaris) Libraries else c(paste(RLIBPATH, "/R", sep=""), Libraries)
+    .Object@Libraries           <- c(findRLibPath(), Libraries)
     .Object@CFLAGS              <- CFLAGS
     .Object@CXXFLAGS            <- CXXFLAGS
     .Object@FFLAGS              <- FFLAGS
