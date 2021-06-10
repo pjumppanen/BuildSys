@@ -913,7 +913,6 @@ setMethod("make", "BSysProject",
 
       IsWindows <- (Sys.info()["sysname"] == "Windows")
       DlibName  <- dynlib(.Object@ProjectName)
-      HasTee    <- hasTee()
 
       ObjFolder    <- paste(.Object@WorkingFolder, .Object@ObjName, sep="")
       CapturePath  <- paste(.Object@WorkingFolder, .Object@ProjectName, ".log", sep="")
@@ -941,7 +940,8 @@ setMethod("make", "BSysProject",
         return (hasTee)
       }
 
-      CaptureCmd   <- if (IsWindows && HasTee) paste("2>&1 | tee", quoteArg(CapturePath)) else ""
+      HasTee      <- hasTee()
+      CaptureCmd  <- if (IsWindows && HasTee) paste("2>&1 | tee", quoteArg(CapturePath)) else ""
       
       # run make
       if (Operation == "clean")
