@@ -9,68 +9,11 @@
 # -----------------------------------------------------------------------------
 
 
-pkg.env <- new.env()
-pkg.env$Initialised <- FALSE
-pkg.env$RLibPath    <- ""
-
-
 dynlib <- function(BaseName)
 {
   LibName <- paste(BaseName, .Platform$dynlib.ext, sep="")
 
   return (LibName)
-}
-
-
-# -----------------------------------------------------------------------------
-# Seems some distros of R dont have R lib for some reason and I don't 
-# understand exactly why. This function is an attempt to figure that out 
-# dynamically. 
-# -----------------------------------------------------------------------------
-findRLibPath <- function()
-{
-  if (!pkg.env$Initialised)
-  {
-    OS <- Sys.info()[["sysname"]]
-
-    pkg.env$RLibPath <- ""
-
-    lines          <- c("\n")
-    SourceFilePath <- paste0(tempdir(), "/test.c")
-
-    if (OS == "Windows")
-    {
-      SourceFilePath <- gsub("/", "\\\\", SourceFilePath)
-    }
-
-    writeLines(lines, SourceFilePath)
-
-    command.line <- (paste0("R CMD SHLIB -n ", SourceFilePath))
-    result       <- try(system(command.line, wait=TRUE, intern=TRUE), silent=TRUE)
-
-    unlink(SourceFilePath)
-
-    LibIncludeString <- ""
-
-    for (line in result)
-    {
-      match <- regexpr("\\-L[ \\\\t]*[^ \\\\t]+[ \\\\t]+\\-l[ \\\\t]*[^ \\\\t]+", line)
-
-      if (match >= 0)
-      {
-        LibIncludeString <- substr(line, match, match + attr(match, "match.length") - 1)
-        LibIncludeString <- gsub("\\-L\"", "", LibIncludeString)
-        LibIncludeString <- gsub("\"[ \t]*\\-l", "/", LibIncludeString)
-
-        pkg.env$RLibPath <- LibIncludeString
-        break
-      }
-    }
-
-    pkg.env$Initialised <- TRUE
-  }
-
-  return(pkg.env$RLibPath)
 }
 
 
@@ -473,9 +416,6 @@ setMethod("initProjectFromFolder", "BSysProject",
       FullPath <- addSlash(getwd())
     }
 
-#    IsSolaris <- grepl('SunOS', Sys.info()['sysname'])
-    RLibPath <- findRLibPath()
-
     .Object@WorkingFolder       <- FullPath
     .Object@ProjectName         <- Name
     .Object@SourceName          <- ""
@@ -488,8 +428,7 @@ setMethod("initProjectFromFolder", "BSysProject",
     .Object@Packages            <- Packages
     .Object@Includes            <- c(R.home("include"), Includes)
     .Object@Defines             <- Defines
-#    .Object@Libraries           <- if (IsSolaris) Libraries else c(paste(RLIBPATH, "/R", sep=""), Libraries)
-    .Object@Libraries           <- if (nchar(RLibPath) > 0) c(Libraries, RLibPath) else Libraries
+    .Object@Libraries           <- Libraries
     .Object@CFLAGS              <- CFLAGS
     .Object@CXXFLAGS            <- CXXFLAGS
     .Object@FFLAGS              <- FFLAGS
@@ -776,6 +715,7 @@ setMethod("buildMakefile", "BSysProject",
 
       gcc.path <- normalizePath(Sys.which("gcc"), "/", mustWork=FALSE)
       gcc.dir  <- ""
+      WinSub   <- ""
 
       if (grepl("mingw", gcc.path))
       {
@@ -785,11 +725,13 @@ setMethod("buildMakefile", "BSysProject",
         {
           # mingw64
           gcc.path <- sub("/mingw\\d\\d", "/mingw64", gcc.path)
+          WinSub   <- "x64/"
         }
         else
         {
           # mingw32
           gcc.path <- sub("/mingw\\d\\d", "/mingw32", gcc.path)
+          WinSub   <- "x32/"
         }
 
         gcc.dir <- sub("/gcc.*", "/", gcc.path)
@@ -798,6 +740,9 @@ setMethod("buildMakefile", "BSysProject",
       # Build makefile
       MakefileTxt <-c(
         idStamp(),
+        paste("R_SHARE_DIR=", R.home("share"), sep=""),
+        paste("R_HOME=", R.home(), sep=""),
+        paste("include $(R_HOME)/etc/", WinSub, "Makeconf", sep=""), 
         paste("CC=", gcc.dir, "gcc", sep=""),
         paste("CXX=", gcc.dir, "g++", sep=""),
         paste("FC=", gcc.dir, "gfortran", sep=""),
@@ -811,7 +756,7 @@ setMethod("buildMakefile", "BSysProject",
               paste(sapply(.Object@SourceFiles, function(item){ gsub("\\..*$", ".o", item@Filename)}), collapse=" \\\n"), sep=""),
         "",
         paste(DlibName, " : $(objects)", sep=""),
-        paste("\t$(CXX) -o ", DlibName, " $(LDFLAGS) $(objects) $(LDLIBS)", sep=""),
+        paste("\t$(CXX) -o ", DlibName, " $(LDFLAGS) $(objects) $(LDLIBS) $(LIBR)", sep=""),
         ""
       )
 
