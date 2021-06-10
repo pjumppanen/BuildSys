@@ -911,6 +911,16 @@ setMethod("make", "BSysProject",
         return (paste0("\"", arg, "\""))
       }
 
+      IsWindows <- (Sys.info()["sysname"] == "Windows")
+      DlibName  <- dynlib(.Object@ProjectName)
+      HasTee    <- hasTee()
+
+      ObjFolder    <- paste(.Object@WorkingFolder, .Object@ObjName, sep="")
+      CapturePath  <- paste(.Object@WorkingFolder, .Object@ProjectName, ".log", sep="")
+      ScriptPath   <- paste(.Object@WorkingFolder, .Object@ProjectName, ".sh", sep="")
+      FinishedFile <- paste(.Object@WorkingFolder, .Object@ProjectName, ".fin", sep="")
+      CaptureCmd   <- if (IsWindows && HasTee) paste("2>&1 | tee", quoteArg(CapturePath)) else ""
+
       hasTee <- function()
       {
         TestCmd <- "tee --version &>/dev/null"
@@ -931,16 +941,6 @@ setMethod("make", "BSysProject",
 
         return (hasTee)
       }
-
-      IsWindows <- (Sys.info()["sysname"] == "Windows")
-      DlibName  <- dynlib(.Object@ProjectName)
-      HasTee    <- hasTee()
-
-      ObjFolder    <- paste(.Object@WorkingFolder, .Object@ObjName, sep="")
-      CapturePath  <- paste(.Object@WorkingFolder, .Object@ProjectName, ".log", sep="")
-      ScriptPath   <- paste(.Object@WorkingFolder, .Object@ProjectName, ".sh", sep="")
-      FinishedFile <- paste(.Object@WorkingFolder, .Object@ProjectName, ".fin", sep="")
-      CaptureCmd   <- if (IsWindows && HasTee) paste("2>&1 | tee", quoteArg(CapturePath)) else ""
 
       # run make
       if (Operation == "clean")
