@@ -474,6 +474,7 @@ setMethod("initProjectFromFolder", "BSysProject",
     }
 
 #    IsSolaris <- grepl('SunOS', Sys.info()['sysname'])
+    RLibPath <- findRLibPath()
 
     .Object@WorkingFolder       <- FullPath
     .Object@ProjectName         <- Name
@@ -488,7 +489,7 @@ setMethod("initProjectFromFolder", "BSysProject",
     .Object@Includes            <- c(R.home("include"), Includes)
     .Object@Defines             <- Defines
 #    .Object@Libraries           <- if (IsSolaris) Libraries else c(paste(RLIBPATH, "/R", sep=""), Libraries)
-    .Object@Libraries           <- c(findRLibPath(), Libraries)
+    .Object@Libraries           <- if (nchar(RLibPath) > 0) c(Libraries, RLibPath) else Libraries
     .Object@CFLAGS              <- CFLAGS
     .Object@CXXFLAGS            <- CXXFLAGS
     .Object@FFLAGS              <- FFLAGS
