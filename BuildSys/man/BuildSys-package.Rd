@@ -10,28 +10,24 @@
 }
 \details{
 In the standard \emph{R} approach dynamic libraries are typically built using the \emph{R CMD} interface.
-That interface in turn uses the \emph{GNU make} system to build the library but only in a transient fashion.
-In other words, a makefile is constructucted based upon a bundled template, \emph{GNU make} is executed to
-compile and link the library and the makefile deleted post completion. Whilst this is a reasonable
-approach for simple \emph{one source file} projects, it bypasses the benefits of a makefile in the case
-of more complex ones.
+That interface in turn uses the \emph{GNU make} system to build the library through a generic makefile
+bundled with \emph{R}. This is presumably done to simplify the process of building dynamic libraries for
+the less experience. The downside however, is adding complexity to the process when doing more esoteric 
+programming that makes use of static or dynamic libraries outside of those bundled with \emph{R}. In those 
+cases it is likely that we may need to specify compiler include options to be able to successfully compile 
+the code but \emph{R CMD SHLIB} provides no direct method of acomplishing this task. Instead we have to create a 
+\emph{Makevars} file that defines the variables \code{PKG_CFLAGS}, \code{PKG_CXXFLAGS} or \code{PKG_FFLAGS} 
+to achieve the desired outcome. 
 
-For example, consider the case of developing a library with multiple interface functions contained
-within, with each function implementation implemented in a separate source file. Lets say there are
-five of these. With the traditional \emph{R} approach, with each change in code to one of the source files
-all the source files will be re-built and linked because the makefile is transient and re-created
-every time. If we were to construct a traditional makefile and use make in the more typical manner
-then only the files that need re-compilation will be re-compiled. In complex projects this saves
-a considerable amount of time.
+It is also common to have build issues with libraries not linking because of missing dependencies or link 
+order issues (libraries must be linked in the correct order with \emph{gcc} to ensure error free linking). 
+Resolving these link related issues is made more complex through the \emph{R CMD} interface because it is no
+longer possible to simply look at the makefile definition and make modifications to it in an attempt to resolve 
+the build problem. By having a system approach whereby makefiles are the centre of the build process and not 
+obfuscated away in an R installation folder, the process of debugging build issues is made simpler by virtue 
+of the fact that all necessary changes to fix the build are in one file only, and a simple one at that.
 
-Moving beyond that, it is common to have build issues with libraries not linking because of missing
-dependencies. Resolving these link related issues is made more complex by having a transient makefile
-because it is no longer possible to simply look at the makefile definition and make modifications
-to it in an attempt to resolve the build problem. By having a system approach whereby makefiles are
-the centre of the build process and are not transient, the process of debugging build issues is made
-simpler.
-
-Finally, a major part of developing library code is debugging and standard \emph{R} provides little support
+Lastly, a major part of developing library code is debugging and standard \emph{R} provides little support
 for that. Developers typically rely on \emph{gdb / lldb} command line driven debugger support, which is
 daunting for an inexperienced user, so much so that many will simply resort to print statement based
 debugging approaches, which whilst capable of resolving bugs, is a cumbersome and slow approach. What
