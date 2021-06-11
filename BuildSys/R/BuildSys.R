@@ -667,8 +667,20 @@ setMethod("buildMakefile", "BSysProject",
       }
 
       LDFLAGS <- c("-shared")
+      WinSub  <- ""
 
-      if (Sys.info()["sysname"] != "Windows")
+      if (Sys.info()["sysname"] == "Windows")
+      {
+        if (Sys.info()["machine"]=="x86-64")
+        {
+          WinSub <- "x64/"
+        }
+        else
+        {
+          WinSub <- "x32/"
+        }
+      }
+      else
       {
         COMMONFLAGS <- c(COMMONFLAGS, "-fPIC")
         LDFLAGS     <- c(LDFLAGS, "-fPIC")
@@ -715,7 +727,6 @@ setMethod("buildMakefile", "BSysProject",
 
       gcc.path <- normalizePath(Sys.which("gcc"), "/", mustWork=FALSE)
       gcc.dir  <- ""
-      WinSub   <- ""
 
       if (grepl("mingw", gcc.path))
       {
