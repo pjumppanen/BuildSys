@@ -7,7 +7,7 @@
 \abstract{%
 A powerful feature of \strong{R} is the ability to make use of dynamically loaded libraries and call functions within (API) through the \code{.C} or \code{.CALL} interface. 
 This allows the numerically intensive parts of an algorithm to be implemented in efficient compiled code (typically \strong{C/C++} or \strong{FORTRAN}) to  
-obtain a significant boost in performance. The flip side of this approach is the complexity and difficulty of compilation, and inarticular,
+obtain a significant boost in performance. The flip side of this approach is the complexity and difficulty of compilation, and in particular,
 the debugging of the compiled code. \pkg{BuildSys} is a package that streamlines and integrates into \strong{R}, the process of both building and debugging
 dynamically loaded libraries using well established and freely available tools and making debugging in particular, a more pleasant and 
 productive part of the process.  
@@ -26,9 +26,10 @@ environment variables to obtain the desired compilation result. This is a simple
 libraries within \strong{R} packages, but for general use in circumstances where there are compile and/or link errors due to makefile mis-configuration 
 (ie. missing include paths, library paths or libraries), it can be challenging to determine the source of the error in the command line specification. Furthermore, 
 if the shared library contains many individual source files and uses of a number of static third party libraries, the required command line can become 
-unwieldy. For one off library development that is not targetting packaging deployment but simply fulfilling a one off need, it can be easier to address the 
-build issues in compiling a library by using a project specific makefile and \dfn{GNU make} invocation directly rather than going through the \samp{R CMD SHLIB} 
-mechanism. \pkg{BuildSys} takes this approach by encapsulating a makefile within an S4 class that is managed from within \strong{R}. 
+unwieldy and may also require the use of a secondary \emph{Makevars} file to specify addition compiler switches. For one off library development that is not targetting
+packaging deployment but simply fulfilling a one off need, it can be easier to address the build issues in compiling a library by using a project specific makefile 
+and \dfn{GNU make} invocation directly rather than going through the \samp{R CMD SHLIB} mechanism. \pkg{BuildSys} takes this approach by encapsulating a makefile within 
+an S4 class that is managed from within \strong{R}. 
 
 The third process in library development, debugging, is the most cumbersome part of currently used approaches and remains a stumbling 
 block for many wishing to develop custom dynamic libraries, but who lack the knowledge and experience to make use of the available debugging 
@@ -52,14 +53,22 @@ use a C++ library that encapsulates the native \strong{R} data structures within
 incapable of meaningfully visualising in their default state. 
 
 The most widely used interface wrapper within the \strong{R} community is \pkg{Rcpp}\citep{RcppIntro},\citep{Rcpp}. Additionally, the packages \pkg{RcppEigen} 
-and \pkg{TMB} build upon the interface that \pkg{Rcpp} provides to support linear algebra\citep{RcppEigen}, \citep{RcppEigenLA}, 
-automatic differentiation\citep{TMBlaplace} and random effects models\citep{TMB}. The utility of these packages alone represent a clear motivation for 
-developing support for a more complete debugging experience.
+and \pkg{TMB} build upon that interface to support \emph{linear algebra} \citep{RcppEigen}, \citep{RcppEigenLA}, \emph{automatic differentiation} \citep{TMBlaplace} and 
+\emph{random effects models} \citep{TMB}. The utility of these packages alone represent a clear motivation for developing support for a more complete debugging 
+experience. In fact, the initial motivation in developing \pkg{BuildSys} was to aid in debugging \pkg{TMB} based random effects model development in a 
+\emph{fisheries MSE} (management strategy evaluation) context, although the package has general utility in any \strong{R} dynamic library development situation.
 
 \hypertarget{exitising-debugging-approaches}{%
 \subsection{Existing Debugging Approaches}
 \label{exitising-debugging-approaches}}
-
+Despite being widely used, documentation relating to \pkg{Rcpp} is notable for the lack of mention in any significant way of the process of debugging. For instance, the 
+introductory paper \emph{Extending R with C++: A brief Introduction to Rcpp} \citep{RcppIntro} makes no mention of debugging, nor does the package documentation \citep{Rcpp}. 
+This equally applies to packages that build upon \pkg{Rcpp}. Anecdotally, debugging appears to be the \emph{bain of existence} of an \strong{R} library developer and 
+there appears to be ample need for simpler (but not at the expense of capability) approaches. \citep{DebuggingRandCcodeinR} advocates debugging using 
+\dfn{GDB}\citep{GDB}, either through \dfn{EMACS} or \dfn{DDD}\citep{DDD} as a \dfn{GDB} front end, with memory errors being tackled with \dfn{valgrind}. Similarly, 
+\citep{DebuggingC_Cpp} advocates \dfn{GDB} or \dfn{LLDB} \citep{LLDB} (depending on the target operating system) for general debugging and \dfn{valgrind} for debugging memory 
+errors, though makes the point that \emph{this is not for the faint of heart, and requires some C-level familiarity}. Although not explicit, this hints at the difficulty
+many experience with debugging dynamic libraries for R. 
 
 \hypertarget{visual-studio-code-extensions}{%
 \subsection{GUI Debugging though Visual Studio Code}
