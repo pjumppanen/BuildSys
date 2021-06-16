@@ -781,20 +781,11 @@ setMethod("buildMakefile", "BSysProject",
                           paste(sapply(SourceFile@Dependencies, function(dep) {paste(IncludeRelativePath, dep, sep="")}), collapse=" "),
                           sep="")
 
-        if (nchar(SrcRelativePath) > 0)
-        {
-          BuildRule   <- makeBuildRule(SourceFile, SrcRelativePath)
-          MakefileTxt <- c(MakefileTxt,
-                          MakeRule,
-                          BuildRule,
-                          "")
-        }
-        else
-        {
-          MakefileTxt <- c(MakefileTxt,
-                          MakeRule,
-                          "")
-        }
+        BuildRule   <- makeBuildRule(SourceFile, SrcRelativePath)
+        MakefileTxt <- c(MakefileTxt,
+                        MakeRule,
+                        BuildRule,
+                        "")
       }
 
       MakefileTxt <- c(MakefileTxt,
