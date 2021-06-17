@@ -65,15 +65,126 @@ Despite being widely used, documentation relating to \pkg{Rcpp} is notable for t
 introductory paper \emph{Extending R with C++: A brief Introduction to Rcpp} \citep{RcppIntro} makes no mention of debugging, nor does the package documentation \citep{Rcpp}. 
 This equally applies to packages that build upon \pkg{Rcpp}. Anecdotally, debugging appears to be the \emph{bain of existence} of an \strong{R} library developer and 
 there appears to be ample need for simpler (but not at the expense of capability) approaches. \citep{DebuggingRandCcodeinR} advocates debugging using 
-\dfn{GDB}\citep{GDB}, either through \dfn{EMACS} or \dfn{DDD}\citep{DDD} as a \dfn{GDB} front end, with memory errors being tackled with \dfn{valgrind}. Similarly, 
+\dfn{GDB}\citep{GDB}, either through \dfn{EMACS} or \dfn{DDD}\citep{DDD} as a \dfn{GDB} front end, with memory errors being tackled with \dfn{valgrind}\citep{valgrind}. Similarly, 
 \citep{DebuggingC_Cpp} advocates \dfn{GDB} or \dfn{LLDB} \citep{LLDB} (depending on the target operating system) for general debugging and \dfn{valgrind} for debugging memory 
 errors, though makes the point that \emph{this is not for the faint of heart, and requires some C-level familiarity}. Although not explicit, this hints at the difficulty
-many experience with debugging dynamic libraries for R. 
+many experience with debugging dynamic libraries for R. Although not specifically related to R, \citep{ImprovingCppDebug} laments the mis-givings of the debugging experience 
+(circa 2020), summarises existing approaches and proposes the use of \dfn{Microsoft Visual Code}\citep{VSCodeDownload} as a possible solution. A common feature of the 
+GUI front end debuggers is the need for a non-trivial setup stage. \dfn{Microsoft Visual Code} is no exception, although \pkg{BuildSys} includes processes that fully automate
+this setup stage, thereby making the process of GUI hosted debugging of R dynamic libraries simpler and more accessible.
 
 \hypertarget{visual-studio-code-extensions}{%
 \subsection{GUI Debugging though Visual Studio Code}
 \label{visual-studio-code-extensions}}
+\dfn{Visual Studio Code} is a freely available and extensible cross platform text editor designed specifically for coding. It has been widely adopted in the general programming
+community with a user base in excess of 2.6 million\citep{VCusers} and was \emph{the number one project in the 2017 GitHub Octoverse}. Central to the 
+popularity of the editor is the ability to customize it to particular niche needs through downloadable extensions. Of note in this particular application of \dfn{Visual Studio Code} 
+is the \emph{Microsoft C/C++ extension} \citep{VSCodeCCppExt} which, apart from providing editor feature support targeting the C and C++ languages, also provides support for 
+debugging via the machine interface to \dfn{GDB} (\dfn{GDB-MI}). It also provided debugging support on \dfn{MacOS} via \dfn{LLDB-MI}, however Apple have since abandoned support for \dfn{LLDB-MI} making 
+the debugging support via this extension on MacOS inopperable. However, a third party extension, \dfn{CodeLLDB}\citep{CodeLLDB}, provides the equivalent debugging support that does not rely on
+\dfn{LLDB-MI} to interface with \dfn{LLDB} and works with current versions of \dfn{MacOS}. 
 
+Both \emph{CodeLLDB} and the \emph{Microsoft C/C++ extension} make debugging available through added configurations. These are codified using \dfn{JSON}\citep{JSON} format configration files;
+one to specify how to launch or attach a debug session (the \emph{launch.json} file) and one to specify information needed to be able to correctly interpret the code within the debugging 
+session (the \emph{c\_cpp\_properties.json} file). Typical \emph{launch.json} and \emph{c\_cpp\_properties.json} files are illustrated in Figures \ref{fig:launchJSON} and \ref{fig:CnCppProp}.
+Whilst not overly complex, it is relatively easy to mis-configure and be left with partially operable or completely broken debugging. In the case of \pkg{BuildSys} these two files are 
+automatically generated for the user and placed in the necessary folder so no user intervention is required and debugging works as expected.
+
+Within a \emph{Visual Code} debug session (Figure \ref{fig:VisualCode}) the user has the ability to:
+
+\begin{itemize}
+\item set breakpoints either with or without conditions (ie. breakpoint counts and breakpoints triggered by data expression)
+\item control execution flow with, single stepping, stepping in and stepping out
+\item add variable watches to the watch window
+\item see contexual local variable data
+\item see the stack frame and navigate through the call trace
+\end{itemize}
+
+Of particular note is the ability to use complex evaluated expressions that update with program flow within the watch window (\code{xa[i]}, \code{xb[j]} in Figure \ref{fig:VisualCode}). 
+Whilst a seasoned \dfn{GDB} or \dfn{LLDB} user could extract this information in the command line equivalent, multiple commands taken from a vast command set are typically required,
+making this approach challenging for a novice user of these products. On the other hand, in a GUI presented interface the process of utilising these debugging features is made obvious, 
+requires little understanding of the debugger command set, and presents the information in a readily digestible manner, making the debugging experience less daungting and more productive, 
+particularly for the novice user. 
+
+\begin{Schunk}
+\begin{figure}[htbp]
+{\centering}
+\begin{verbatim}
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "(gdb) Launch",
+      "type": "cppdbg",
+      "request": "launch",
+      "targetArchitecture":"x86_64",
+      "program": "C:/Users/jum002/DOCUME~1/R/R-40~1.5/bin/x64/Rgui.exe",
+      "args": ["--no-save", "--no-restore"],
+      "stopAtEntry": false,
+      "cwd": "C:/Users/jum002/DOCUME~1/Test/CONVOL~1.RPR",
+      "environment": [{"name":"R_HOME",
+                       "value":"C:/Users/jum002/Documents/R/R-4.0.5"}],
+      "externalConsole": true,
+      "MIMode": "gdb",
+      "miDebuggerPath": "C:/rtools40/mingw64/bin/gdb.exe",
+      "miDebuggerArgs": "--init-command debugCmd.txt",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    }
+  ]
+}
+\end{verbatim}
+\caption[A Typical launch.json File]{A Typical launch.json File}
+\label{fig:launchJSON}
+\end{figure}
+\end{Schunk}
+  
+\begin{Schunk}
+\begin{figure}[htbp]
+{\centering}
+\begin{verbatim}
+{
+  "configurations": [
+  {
+    "name": "Win32",
+    "intelliSenseMode": "gcc-x64",
+    "includePath": ["${workspaceFolder}",
+                    "C:/rtools40/mingw64/include/**",
+                    "C:/rtools40/usr/include/**",
+                    "C:/Users/jum002/DOCUME~1/R/R-40~1.5/include/**",
+                    "C:/Users/jum002/DOCUME~1/Test/**",
+                    "C:/Users/jum002/DOCUME~1/R/R-40~1.5/include/**"],
+    "defines": [],
+    "compilerPath": "C:/rtools40/mingw64/bin/gcc.exe",
+    "cStandard": "c89",
+    "cppStandard": "c++14",
+    "browse": {
+        "limitSymbolsToIncludedHeaders": true,
+        "databaseFilename": ""
+      }
+    }
+  ],
+  "version": 4
+}
+\end{verbatim}
+\caption[A Typical c\_cpp\_properties.json File]{A Typical c\_cpp\_properties.json File}
+\label{fig:CnCppProp}
+\end{figure}
+\end{Schunk}
+  
+\begin{Schunk}
+\begin{figure}[htbp]
+{\centering \includegraphics[width=0.95\textwidth]{VisualCode} 
+
+}
+\caption[Visual Code Debug Session]{Visual Code Debug Session}\label{fig:VisualCode}
+\end{figure}
+\end{Schunk}
 
 Introductory section which may include references in parentheses
 \citep{R}, or cite a reference such as \citet{R} in the text. \citep{Rcpp}, \citep{RcppEigen}, \citep{TMB}, \citep{Rextensions}
