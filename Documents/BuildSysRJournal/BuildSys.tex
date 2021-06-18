@@ -15,6 +15,7 @@ productive part of the process.
 
 \hypertarget{introduction}{%
 \subsection{Introduction}\label{introduction}}
+
 The process of producing functionally correct dynamic libraries for \strong{R} can be broken down into three processes: (1) code compilation to produce object files,
 (2) linking object files to produce a dynamically library and (3) runtime testing and debugging of the library code. In \strong{R} steps (1) and (2) 
 are typically handled through the \samp{R CMD SHLIB}\citep{SHLIB} mechanism. Internally that mechanism typically relies on \dfn{GNU make}\citep{GnuMake} which 
@@ -61,6 +62,7 @@ experience. In fact, the initial motivation in developing \pkg{BuildSys} was to 
 \hypertarget{exitising-debugging-approaches}{%
 \subsection{Existing Debugging Approaches}
 \label{exitising-debugging-approaches}}
+
 Despite being widely used, documentation relating to \pkg{Rcpp} is notable for the lack of mention in any significant way of the process of debugging. For instance, the 
 introductory paper \emph{Extending R with C++: A brief Introduction to Rcpp} \citep{RcppIntro} makes no mention of debugging, nor does the package documentation \citep{Rcpp}. 
 This equally applies to packages that build upon \pkg{Rcpp}. Anecdotally, debugging appears to be the \emph{bain of existence} of an \strong{R} library developer and 
@@ -76,6 +78,7 @@ this setup stage, thereby making the process of GUI hosted debugging of R dynami
 \hypertarget{visual-studio-code-extensions}{%
 \subsection{GUI Debugging though Visual Studio Code}
 \label{visual-studio-code-extensions}}
+
 \dfn{Visual Studio Code} is a freely available and extensible cross platform text editor designed specifically for coding. It has been widely adopted in the general programming
 community with a user base in excess of 2.6 million\citep{VCusers} and was \emph{the number one project in the 2017 GitHub Octoverse}. Central to the 
 popularity of the editor is the ability to customize it to particular niche needs through downloadable extensions. Of note in this particular application of \dfn{Visual Studio Code} 
@@ -90,6 +93,77 @@ session (the \emph{c\_cpp\_properties.json} file). Typical \emph{launch.json} an
 Whilst not overly complex, it is relatively easy to mis-configure and be left with partially operable or completely broken debugging. In the case of \pkg{BuildSys} these two files are 
 automatically generated for the user and placed in the necessary folder so no user intervention is required and debugging works as expected.
 
+\begin{Schunk}
+  \begin{figure}[htbp]
+  {\centering}
+  \begin{verbatim}
+  {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "(gdb) Launch",
+        "type": "cppdbg",
+        "request": "launch",
+        "targetArchitecture":"x86_64",
+        "program": "C:/Users/jum002/DOCUME~1/R/R-40~1.5/bin/x64/Rgui.exe",
+        "args": ["--no-save", "--no-restore"],
+        "stopAtEntry": false,
+        "cwd": "C:/Users/jum002/DOCUME~1/Test/CONVOL~1.RPR",
+        "environment": [{"name":"R_HOME",
+                         "value":"C:/Users/jum002/Documents/R/R-4.0.5"}],
+        "externalConsole": true,
+        "MIMode": "gdb",
+        "miDebuggerPath": "C:/rtools40/mingw64/bin/gdb.exe",
+        "miDebuggerArgs": "--init-command debugCmd.txt",
+        "setupCommands": [
+          {
+            "description": "Enable pretty-printing for gdb",
+            "text": "-enable-pretty-printing",
+            "ignoreFailures": true
+          }
+        ]
+      }
+    ]
+  }
+  \end{verbatim}
+  \caption[A Typical launch.json File]{A Typical launch.json File}
+  \label{fig:launchJSON}
+  \end{figure}
+\end{Schunk}
+    
+\begin{Schunk}
+  \begin{figure}[htbp]
+  {\centering}
+  \begin{verbatim}
+  {
+    "configurations": [
+    {
+      "name": "Win32",
+      "intelliSenseMode": "gcc-x64",
+      "includePath": ["${workspaceFolder}",
+                      "C:/rtools40/mingw64/include/**",
+                      "C:/rtools40/usr/include/**",
+                      "C:/Users/jum002/DOCUME~1/R/R-40~1.5/include/**",
+                      "C:/Users/jum002/DOCUME~1/Test/**",
+                      "C:/Users/jum002/DOCUME~1/R/R-40~1.5/include/**"],
+      "defines": [],
+      "compilerPath": "C:/rtools40/mingw64/bin/gcc.exe",
+      "cStandard": "c89",
+      "cppStandard": "c++14",
+      "browse": {
+          "limitSymbolsToIncludedHeaders": true,
+          "databaseFilename": ""
+        }
+      }
+    ],
+    "version": 4
+  }
+  \end{verbatim}
+  \caption[A Typical c\_cpp\_properties.json File]{A Typical c\_cpp\_properties.json File}
+  \label{fig:CnCppProp}
+  \end{figure}
+\end{Schunk}
+    
 Within a \emph{Visual Code} debug session (Figure \ref{fig:VisualCode}) the user has the ability to:
 
 \begin{itemize}
@@ -107,159 +181,191 @@ requires little understanding of the debugger command set, and presents the info
 particularly for the novice user. 
 
 \begin{Schunk}
-\begin{figure}[htbp]
-{\centering}
-\begin{verbatim}
-{
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "name": "(gdb) Launch",
-      "type": "cppdbg",
-      "request": "launch",
-      "targetArchitecture":"x86_64",
-      "program": "C:/Users/jum002/DOCUME~1/R/R-40~1.5/bin/x64/Rgui.exe",
-      "args": ["--no-save", "--no-restore"],
-      "stopAtEntry": false,
-      "cwd": "C:/Users/jum002/DOCUME~1/Test/CONVOL~1.RPR",
-      "environment": [{"name":"R_HOME",
-                       "value":"C:/Users/jum002/Documents/R/R-4.0.5"}],
-      "externalConsole": true,
-      "MIMode": "gdb",
-      "miDebuggerPath": "C:/rtools40/mingw64/bin/gdb.exe",
-      "miDebuggerArgs": "--init-command debugCmd.txt",
-      "setupCommands": [
-        {
-          "description": "Enable pretty-printing for gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
-        }
-      ]
-    }
-  ]
-}
-\end{verbatim}
-\caption[A Typical launch.json File]{A Typical launch.json File}
-\label{fig:launchJSON}
-\end{figure}
+  \begin{figure}[htbp]
+  {\centering \includegraphics[width=0.95\textwidth]{VisualCode} 
+
+  }
+  \caption[Visual Code Debug Session]{Visual Code Debug Session}\label{fig:VisualCode}
+  \end{figure}
 \end{Schunk}
   
+
+\hypertarget{BuildSys-Overview}{%
+\subsection{An Overview in Using BuildSys}
+\label{visual-studio-code-extensions}}
+
+A useful illustration of BuildSys is applying it to the code examples given in \emph{Extending R with C++: A Brief Introduction to Rcpp}\citep{RcppIntro}. The main example is 
+the convolve .CALL one first appearing in \emph{Writing R Extensions}\citep{Rextensions} Manual. Assume the code given below is in the file \emph{"convolve.c"} in the folder \emph{"\textasciitilde/ConvoleRext"}.
+
 \begin{Schunk}
-\begin{figure}[htbp]
-{\centering}
-\begin{verbatim}
-{
-  "configurations": [
+  \begin{Sinput}
+  #include <R.h>
+  #include <Rinternals.h>
+  
+  SEXP convolve2(SEXP a, SEXP b)
   {
-    "name": "Win32",
-    "intelliSenseMode": "gcc-x64",
-    "includePath": ["${workspaceFolder}",
-                    "C:/rtools40/mingw64/include/**",
-                    "C:/rtools40/usr/include/**",
-                    "C:/Users/jum002/DOCUME~1/R/R-40~1.5/include/**",
-                    "C:/Users/jum002/DOCUME~1/Test/**",
-                    "C:/Users/jum002/DOCUME~1/R/R-40~1.5/include/**"],
-    "defines": [],
-    "compilerPath": "C:/rtools40/mingw64/bin/gcc.exe",
-    "cStandard": "c89",
-    "cppStandard": "c++14",
-    "browse": {
-        "limitSymbolsToIncludedHeaders": true,
-        "databaseFilename": ""
+      int na, nb, nab;
+      double *xa, *xb, *xab;
+      SEXP ab;
+  
+      a = PROTECT(coerceVector(a, REALSXP));
+      b = PROTECT(coerceVector(b, REALSXP));
+      na = length(a); nb = length(b); nab = na + nb - 1;
+      ab = PROTECT(allocVector(REALSXP, nab));
+      xa = REAL(a); xb = REAL(b); xab = REAL(ab);
+      for(int i = 0; i < nab; i++) xab[i] = 0.0;
+      for(int i = 0; i < na; i++)
+          for(int j = 0; j < nb; j++) xab[i + j] += xa[i] * xb[j];
+      UNPROTECT(3);
+      return ab;
+  }
+  \end{Sinput}
+\end{Schunk}
+
+To create a BuildSys project, compile this file into a dynamic library and load it run,
+
+\begin{Schunk}
+  \begin{Sinput}
+  library(BuildSys)
+  Project <- new("BSysProject", WorkingFolder="~/ConvolveRext", Name="ConvolveRext")
+  make(Project)
+  loadLibrary(Project)
+  \end{Sinput}
+\end{Schunk}
+
+in and R session. To execute the example use,
+
+\begin{Schunk}
+  \begin{Sinput}
+  conv <- function(a, b) .Call("convolve2", a, b)
+  a <- rnorm(100)
+  b <- rep(1.0, times=10)
+  conv(a, b)
+  \end{Sinput}
+\end{Schunk}
+
+giving the output,
+
+\begin{Schunk}
+  \begin{Sinput}
+  [1]  0.98293848  1.24876911  0.60384865  1.55706527  0.69375036  2.56200291
+  [7]  3.35339771  1.99702141  0.36106970  1.05994411 -0.68884999 -1.44729536
+   .
+   .
+   .
+ 103]  2.32572624  2.79692698  2.37123793  1.45493333  1.62681502  0.25344351
+[109]  0.08219538
+  \end{Sinput}
+\end{Schunk}
+
+Note that by default, the \code{make()} command in \pkg{BuildSys} will build code with no optimisations and full debug information. 
+Constructing a release build with full optimisation can be achieved by supplying the \code{Debug=FALSE} argument when creating the project. 
+
+To debug the code in an interactive GUI session call execute \code{vcDebug(Project)} in R. This assumes that
+\emph{Visual Studio Code} and the necessary extensions are correctly installed as per the package requirements, the process of which is discussed in 
+detail in the package help (\code{{?BuildSys}} at an R command prompt). On executing \code{vcDebug(Project)}, R will spawn \emph{Visual Studio Code} 
+with the correct \emph{JSON} files to debug the dynamic library. Within \emph{Visual Studio Code} open the file \emph{"convolve.c"}, set any required
+breakpoints and then press the \emph{F5} key to start a debug session. \emph{Visual Studio Code} will then spawn a new session of R whose initial state
+will be the same as the state of the parent R session when \code{vcDebug(Project)} was called. This behaviour is implemented as a aid to debugging as most 
+debugging sessions will require R based test harmess code / data to debug with and by choosing to execute \code{vcDebug(Project)} after the R test harness is 
+set up we no longer need to do it in the debugging session, irrespective of how many times we re-start debugging the dynamic library. In our case 
+the test data was already in place and the library loaded prior to calling \code{vcDebug(Project)} so in our debugging session all we need to run is \code{conv(a, b)}. 
+The execution then drops out into the debug session at our set breakpoint as in Figure \ref{fig:VisualCode}. Note that variable watches can be valid C/C++
+expressions provided they do not involve function calls. Thus the variables being updated in the loop can be watched with the watch expressions, \code{xa[i]}, 
+\code{xb[j]} and \code{xab[i+j]} and they will be updated as and when the data changes. 
+
+Now turning to the \emph{Rcpp} re-implementation of this example, assume the code given below is in the file \emph{"convolve.cpp"} in the folder \emph{"\textasciitilde/ConvoleRcpp"}.
+
+\begin{Schunk}
+  \begin{Sinput}
+  #include "Rcpp.h"
+
+  using namespace Rcpp;
+  
+  NumericVector convolve2(const NumericVector& a, 
+                          const NumericVector& b)
+  {
+      int i, j;
+      int na = a.size();
+      int nb = b.size();
+      int nab = na + nb - 1;
+  
+      NumericVector ab(nab);
+  
+      for (i = 0 ; i < na ; i++)
+      {
+          for (j = 0 ; j < nb ; j++)
+          {
+              ab[i + j] += a[i] * b[j];
+          }
       }
-    }
-  ],
-  "version": 4
-}
-\end{verbatim}
-\caption[A Typical c\_cpp\_properties.json File]{A Typical c\_cpp\_properties.json File}
-\label{fig:CnCppProp}
-\end{figure}
+  
+      return ab;
+  }
+  
+  // Dynamic lib entry point code
+  RcppExport SEXP convolveCpp(SEXP aSEXP, SEXP bSEXP)
+  {
+      Rcpp::RObject rcpp_result_gen;
+      Rcpp::RNGScope rcpp_rngScope_gen;
+      Rcpp::traits::input_parameter< const NumericVector& >::type a(aSEXP);
+      Rcpp::traits::input_parameter< const NumericVector& >::type b(bSEXP);
+      rcpp_result_gen = Rcpp::wrap(convolve2(a, b));
+      return rcpp_result_gen;
+  }
+  \end{Sinput}
+\end{Schunk}
+
+Note that unlike the original example, this version includes the explicit entry point function \code{convolveCpp()}. 
+Normally code in \pkg{Rcpp} is built using the R functions \code{cppFunction()} and \code{sourceCpp()}. These functions 
+transparently take the C++ code, copy it to a duplicate source code file, then add wrapper functions for the C++ functions 
+marked with \code{Rcpp\:\:Export} and the compiles that extended source file to produce the necessary dynamic library. As we are 
+not using the normal \pkg{Rcpp} compilation route the wrapper code needs to be hand written. 
+Similarly to create a BuildSys project, compile this file into a dynamic library and load it run,
+
+\begin{Schunk}
+  \begin{Sinput}
+  library(BuildSys)
+  library(Rcpp)
+  Project <- new("BSysProject", WorkingFolder="~/ConvolveRcpp", Name="ConvolveRcpp")
+  make(Project)
+  loadLibrary(Project)
+  \end{Sinput}
+\end{Schunk}
+
+in and R session and to execute the example use,
+
+\begin{Schunk}
+  \begin{Sinput}
+  conv <- function(a, b) .Call("convolveCpp", a, b)
+  a <- rnorm(100)
+  b <- rep(1.0, times=10)
+  conv(a, b)
+  \end{Sinput}
+\end{Schunk}
+
+giving the identical output to the previous example. As with the C version of convolve, variable watches of 
+array elements is also possible. However, in this case we require more complex expressions to do so as the 
+arrays are implemented as C++ classes rather than intrinsic C arrays. The corresponding expressions in this
+case are \code{((a).cache).start[i]}, \code{((b).cache).start[j]} and \code{(((ab).cache).start)[i+j]} as 
+shown in Figure \ref{fig:RcppDebug}.
+
+\begin{Schunk}
+  \begin{figure}[htbp]
+  {\centering \includegraphics[width=0.95\textwidth]{RcppDebug} 
+
+  }
+  \caption[Debugging Rcpp Code]{Debugging Rcpp Code}\label{fig:RcppDebug}
+  \end{figure}
 \end{Schunk}
   
-\begin{Schunk}
-\begin{figure}[htbp]
-{\centering \includegraphics[width=0.95\textwidth]{VisualCode} 
+Discuss stuff to do with array bounds exceptions.
 
-}
-\caption[Visual Code Debug Session]{Visual Code Debug Session}\label{fig:VisualCode}
-\end{figure}
-\end{Schunk}
+\hypertarget{Conclusions}{%
+\subsection{Conclusions}
+\label{Conclusions}}
 
-Introductory section which may include references in parentheses
-\citep{R}, or cite a reference such as \citet{R} in the text. \citep{Rcpp}, \citep{RcppEigen}, \citep{TMB}, \citep{Rextensions}
-\citep{DebuggingC_Cpp},\citep{DebuggingRandCcodeinR}, \citep{CodeLLDB-manual}, \citep{CodeLLDB}, \citep{VSCodeTipsTricks}, 
-\citep{VSCodeDownload}, \citep{VSCodeCCppExt}, \citep{VSCodeCCpp}, \citep{GDB}, \citep{ModernDebugging}, \citep{DDD},
-\citep{ImprovingCppDebug},\citep{UsingRtools}, \citep{RcppIntro}, \citep{ihaka:1996}, \citep{RcppEigenLA},
-\citep{TMBlaplace},\citep{DotC},\citep{DotC2},\citep{deSolve},\citep{Routines},\citep{LLDB},
-\citep{Xcode},\citep{debug-visualize-ext},\citep{debug-visualize}
-
-\hypertarget{section-title-in-sentence-case}{%
-\subsection{Section title in sentence
-case}\label{section-title-in-sentence-case}}
-
-%This section may contain a figure such as Figure \ref{fig:Rlogo}.
-%
-%\begin{Schunk}
-%\begin{figure}[htbp]
-%
-%{\centering \includegraphics[width=2in]{Rlogo} 
-%
-%}
-
-%\caption[The logo of R]{The logo of R.}\label{fig:Rlogo}
-%\end{figure}
-%\end{Schunk}
-
-%\hypertarget{another-section}{%
-%\subsection{Another section}\label{another-section}}
-
-There will likely be several sections, perhaps including code snippets,
-such as:
-
-%\begin{Schunk}
-%\begin{Sinput}
-%x <- 1:10
-%plot(x)
-%\end{Sinput}
-%
-%\includegraphics{Journal_files/figure-latex/unnamed-chunk-1-1} \end{Schunk}
-%
-%\hypertarget{summary}{%
-%\subsection{Summary}\label{summary}}
-
-This file is only a basic article template. For full details of
-\emph{The R Journal} style and information on how to prepare your
-article for submission, see the
-\href{https://journal.r-project.org/share/author-guide.pdf}{Instructions
-for Authors}.
-
-\hypertarget{about-this-format-and-the-r-journal-requirements}{%
-\subsubsection{About this format and the R Journal
-requirements}\label{about-this-format-and-the-r-journal-requirements}}
-
-\texttt{rticles::rjournal\_article} will help you build the correct
-files requirements:
-
-\begin{itemize}
-\tightlist
-\item
-  A R file will be generated automatically using \texttt{knitr::purl} -
-  see \url{https://bookdown.org/yihui/rmarkdown-cookbook/purl.html} for
-  more information.
-\item
-  A tex file will be generated from this Rmd file and correctly included
-  in \texttt{RJwapper.tex} as expected to build \texttt{RJwrapper.pdf}.
-\item
-  All figure files will be kept in the default rmarkdown
-  \texttt{*\_files} folder. This happens because
-  \texttt{keep\_tex\ =\ TRUE} by default in
-  \texttt{rticles::rjournal\_article}
-\item
-  Only the bib filename is to modifed. An example bib file is included
-  in the template (\texttt{RJreferences.bib}) and you will have to name
-  your bib file as the tex, R, and pdf files.
-\end{itemize}
+Discuss conclusions.
 
 \bibliography{BuildSysReferences.bib}
 
