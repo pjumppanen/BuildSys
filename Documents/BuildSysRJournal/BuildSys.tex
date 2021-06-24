@@ -358,7 +358,99 @@ shown in Figure \ref{fig:RcppDebug}.
   \caption[Debugging Rcpp Code]{Debugging Rcpp Code}\label{fig:RcppDebug}
   \end{figure}
 \end{Schunk}
-  
+
+Similarly, a useful illustration of BuildSys applied to TMB is made by applying it to the code example given 
+in \emph{TMB: Automatic Differentiation and Laplace Approximation}\citep{TMBlaplace}. The code in question is 
+an implementation of the \emph{theta logistic population model} of \citep{WangG} and \citep{PedersenEtAl}.
+Assume the C++ source code given below is in the file \emph{"thetalog.cpp"} in the folder \emph{"\textasciitilde/thetalog"}. 
+To illustrate bounds checking the code also includes a coding error in the loops that will index beyond the array boundaries.
+
+\begin{Schunk}
+  \begin{Sinput}
+    // Theta logistic population model from Pedersen et al 2012, Ecol. Modelling.
+    #include <TMB.hpp>
+    template<class Type>
+    Type objective_function<Type>::operator() ()
+    {
+      /* Data section */
+      DATA_VECTOR(Y);
+
+      /* Parameter section */
+      PARAMETER_VECTOR(X);
+      PARAMETER(logr0);
+      PARAMETER(logtheta);
+      PARAMETER(logK);
+      PARAMETER(logQ);
+      PARAMETER(logR);
+
+      /* Procedure section */
+      Type r0       = exp(logr0);
+      Type theta    = exp(logtheta);
+      Type K        = exp(logK);
+      Type Q        = exp(logQ);
+      Type R        = exp(logR);
+      int timeSteps = Y.size();
+      Type ans      = 0;
+
+      for (int i = 1 ; i <= timeSteps ; i++)
+      {
+        Type m = X[i - 1] + r0 * (1.0 - pow(exp(X[i - 1]) / K, theta));
+        ans -= dnorm(X[i], m, sqrt(Q), true);
+      }
+
+      for (int i = 0 ; i <= timeSteps ; i++)
+      {
+        ans -= dnorm(Y[i], X[i], sqrt(R), true);
+      }
+
+      return ans;
+    }
+  \end{Sinput}
+\end{Schunk}
+
+The R code required to compile the C++ code and be readied for debugging is given by,
+
+\begin{Schunk}
+  \begin{verbatim}
+  library(BuildSys)
+  library(TMB)
+  Project <- new("BSysProject", WorkingFolder="~/thetalog", Name="thetalog")
+  make(Project)
+  loadLibrary(Project)
+  y <- scan("thetalog.dat", skip = 3, quiet = TRUE)
+  loadLibrary(Project)
+  data       <- list(y = y)
+  parameters <- list(u      = data$y * 0,
+                     logr0  = 0,
+                     logpsi = 0,
+                     logK   = 6,
+                     logQ   = 0,
+                     logR   = 0)
+
+  vcDebug(Project)
+  \end{verbatim}
+\end{Schunk}
+
+To debug we set a breakpoint on a part of code prior to the loop (say \code{DATA\_VECTOR(Y);}) and commence 
+the debug session in Visual Studio Code by pressing the \emph{F5} key and running the following R code 
+in the spawned R session,
+
+\begin{Schunk}
+  \begin{Sinput}
+    obj <- MakeADFun(data, parameters, random = "u", DLL = "thetalog")
+  \end{Sinput}
+\end{Schunk}
+
+The reason for adding the initial breakpoint is due to a limitation in (at least in the Windows version) Visual Studio Code not 
+being able to activate a configuration defined breakpoint on startup. When debugging \pkg{TMB} code \pkg{BuildSys} adds the file \emph{bsys\_abort.cpp}
+to the project. This file implements a C standard library override to the \code{abort()} function which TMB calls in response to 
+boundary errors in indexing. The \emph{launch.json} file includes startup commands for the debugger to set a breakpoint on the call to 
+the \emph{bsys\_abort.cpp} function but if we fail to interrupt the debug session with the added entry point breakpoint to our TMB code, this 
+abort handler breakpoint is never properly activated. Until this issue is resolved this is a suitable work around. 
+
+Having execution halt at our breakpoint line (\code{DATA\_VECTOR(Y);}), continuing exection results in the code execution halting in the \code{abort()}
+function because of the introduced boundary error. 
+
 Discuss stuff to do with array bounds exceptions.
 
 \hypertarget{Conclusions}{%
