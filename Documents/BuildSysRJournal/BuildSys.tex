@@ -22,7 +22,7 @@ are typically handled through the \samp{R CMD SHLIB}\citep{SHLIB} mechanism. Int
 in turn will typically use \dfn{GCC}\citep{gcc} (on most operating systems) or \dfn{CLANG/LLVM}\citep{LLVM} (on MacOS). On Windows based systems \dfn{GNU make} and \dfn{GCC}
 are used and are made available by the \dfn{MINGW} based \dfn{Rtools} installation\citep{UsingRtools}. Compilation through \samp{R CMD SHLIB} 
 involves the use of a generic makefile bundled within the \strong{R} installation that in turn uses environment variable string substitutions to specify the details 
-of which files and compiler switches are needed. The command itself takes the command line and translates it into a suitable call to GNU make with the correct 
+of which files and compiler switches are needed. The command itself takes the command line and translates it into a suitable call to \dfn{GNU make} with the correct 
 environment variables to obtain the desired compilation result. This is a simple, effective and portable way to handle compilation of shared 
 libraries within \strong{R} packages, but for general use in circumstances where there are compile and/or link errors due to makefile mis-configuration 
 (ie. missing include paths, library paths or libraries), it can be challenging to determine the source of the error in the command line specification. Furthermore, 
@@ -35,7 +35,7 @@ an S4 class that is managed from within \strong{R}.
 The third process in library development, debugging, is the most cumbersome part of currently used approaches and remains a stumbling 
 block for many wishing to develop custom dynamic libraries, but who lack the knowledge and experience to make use of the available debugging 
 tools to do so. The most commonly used debugger in an \strong{R} context is \dfn{GDB}\citep{GDB}, which provides realtime debugging of the dynamic library within the
-host application (\strong{R}) via a large set of command line commands invoked at a command prompt in \dfn{GDB}. Similarly, debugging in \strong{R} on MacOS is performed using another 
+host application (\strong{R}) via a large set of command line commands invoked at a command prompt in \dfn{GDB}. Similarly, debugging in \strong{R} on \dfn{MacOS} is performed using another 
 command line based debugger, \dfn{LLDB}\citep{LLDB}. 
 
 If users manage to build the library with appropriate debug information included, load the hosting \strong{R} session, have the debugger find and 
@@ -73,7 +73,7 @@ errors, though makes the point that \emph{this is not for the faint of heart, an
 many experience with debugging dynamic libraries for R. Although not specifically related to R, \citep{ImprovingCppDebug} laments the mis-givings of the debugging experience 
 (circa 2020), summarises existing approaches and proposes the use of \dfn{Microsoft Visual Code}\citep{VSCodeDownload} as a possible solution. A common feature of the 
 GUI front end debuggers is the need for a non-trivial setup stage. \dfn{Microsoft Visual Code} is no exception, although \pkg{BuildSys} includes processes that fully automate
-this setup stage, thereby making the process of GUI hosted debugging of R dynamic libraries simpler and more accessible.
+this setup stage, thereby making the process of GUI hosted debugging of \strong{R} dynamic libraries simpler and more accessible.
 
 \hypertarget{visual-studio-code-extensions}{%
 \subsection{GUI Debugging though Visual Studio Code}
@@ -83,8 +83,8 @@ this setup stage, thereby making the process of GUI hosted debugging of R dynami
 community with a user base in excess of 2.6 million\citep{VCusers} and was \emph{the number one project in the 2017 GitHub Octoverse}. Central to the 
 popularity of the editor is the ability to customize it to particular niche needs through downloadable extensions. Of note in this particular application of \dfn{Visual Studio Code} 
 is the \emph{Microsoft C/C++ extension} \citep{VSCodeCCppExt} which, apart from providing editor feature support targeting the C and C++ languages, also provides support for 
-debugging via the machine interface to \dfn{GDB} (\dfn{GDB-MI}). It also provided debugging support on \dfn{MacOS} via \dfn{LLDB-MI}, however Apple have since abandoned support for \dfn{LLDB-MI} making 
-the debugging support via this extension on MacOS inopperable. However, a third party extension, \dfn{CodeLLDB}\citep{CodeLLDB}, provides the equivalent debugging support that does not rely on
+debugging via the machine interface to \dfn{GDB} (\dfn{GDB-MI}). It also provided debugging support on \dfn{MacOS} via \dfn{LLDB-MI}, however \emph{Apple} have since abandoned support for \dfn{LLDB-MI} making 
+the debugging support via this extension on \dfn{MacOS} inopperable. However, a third party extension, \dfn{CodeLLDB}\citep{CodeLLDB}, provides the equivalent debugging support that does not rely on
 \dfn{LLDB-MI} to interface with \dfn{LLDB} and works with current versions of \dfn{MacOS}. 
 
 Both \emph{CodeLLDB} and the \emph{Microsoft C/C++ extension} make debugging available through added configurations. These are codified using \dfn{JSON}\citep{JSON} format configration files;
@@ -94,7 +94,7 @@ Whilst not overly complex, it is relatively easy to mis-configure and be left wi
 automatically generated for the user and placed in the necessary folder so no user intervention is required and debugging works as expected.
 
 \begin{Schunk}
-  \begin{figure}[htbp]
+  \begin{figure}[h]
   {\centering}
   \begin{verbatim}
   {
@@ -132,7 +132,7 @@ automatically generated for the user and placed in the necessary folder so no us
 \end{Schunk}
     
 \begin{Schunk}
-  \begin{figure}[htbp]
+  \begin{figure}[h]
   {\centering}
   \begin{verbatim}
   {
@@ -181,7 +181,7 @@ requires little understanding of the debugger command set, and presents the info
 particularly for the novice user. 
 
 \begin{Schunk}
-  \begin{figure}[htbp]
+  \begin{figure}[h]
   {\centering \includegraphics[width=0.95\textwidth]{VisualCode} 
 
   }
@@ -194,8 +194,8 @@ particularly for the novice user.
 \subsection{An Overview in Using BuildSys}
 \label{visual-studio-code-extensions}}
 
-A useful illustration of BuildSys is applying it to the code examples given in \emph{Extending R with C++: A Brief Introduction to Rcpp}\citep{RcppIntro}. The main example is 
-the convolve .CALL one first appearing in \emph{Writing R Extensions}\citep{Rextensions} Manual. Assume the code given below is in the file \emph{"convolve.c"} in the folder \emph{"\textasciitilde/ConvoleRext"}.
+A useful illustration of \pkg{BuildSys} is applying it to the code examples given in \emph{Extending R with C++: A Brief Introduction to Rcpp}\citep{RcppIntro}. The main example is 
+the convolve \code{.CALL} one first appearing in \emph{Writing R Extensions}\citep{Rextensions} Manual. Assume the code given below is in the file \emph{"convolve.c"} in the folder \emph{"\textasciitilde/ConvoleRext"}.
 
 \begin{Schunk}
   \begin{Sinput}
@@ -222,7 +222,7 @@ the convolve .CALL one first appearing in \emph{Writing R Extensions}\citep{Rext
   \end{Sinput}
 \end{Schunk}
 
-To create a BuildSys project, compile this file into a dynamic library and load it run,
+To create a \pkg{BuildSys} project, compile this file into a dynamic library and load it run,
 
 \begin{Schunk}
   \begin{Sinput}
@@ -233,7 +233,7 @@ To create a BuildSys project, compile this file into a dynamic library and load 
   \end{Sinput}
 \end{Schunk}
 
-in and R session. To execute the example use,
+in an \strong{R} session. To execute the example use,
 
 \begin{Schunk}
   \begin{Sinput}
@@ -262,10 +262,10 @@ Note that by default, the \code{make()} command in \pkg{BuildSys} will build cod
 Constructing a release build with full optimisation can be achieved by supplying the \code{Debug=FALSE} argument when creating the project. 
 
 To debug the code in an interactive GUI session call execute \code{vcDebug(Project)} in R. This assumes that
-\emph{Visual Studio Code} and the necessary extensions are correctly installed as per the package requirements, the process of which is discussed in 
-detail in the package help (\code{{?BuildSys}} at an R command prompt). On executing \code{vcDebug(Project)}, R will spawn \emph{Visual Studio Code} 
-with the correct \emph{JSON} files to debug the dynamic library. Within \emph{Visual Studio Code} open the file \emph{"convolve.c"}, set any required
-breakpoints and then press the \emph{F5} key to start a debug session. \emph{Visual Studio Code} will then spawn a new session of R whose initial state
+\dfn{Visual Studio Code} and the necessary extensions are correctly installed as per the package requirements, the process of which is discussed in 
+detail in the package help (\code{{?BuildSys}} at an R command prompt). On executing \code{vcDebug(Project)}, R will spawn \dfn{Visual Studio Code} 
+with the correct \emph{JSON} files to debug the dynamic library. Within \dfn{Visual Studio Code} open the file \emph{"convolve.c"}, set any required
+breakpoints and then press the \emph{F5} key to start a debug session. \dfn{Visual Studio Code} will then spawn a new session of R whose initial state
 will be the same as the state of the parent R session when \code{vcDebug(Project)} was called. This behaviour is implemented as a aid to debugging as most 
 debugging sessions will require R based test harmess code / data to debug with and by choosing to execute \code{vcDebug(Project)} after the R test harness is 
 set up we no longer need to do it in the debugging session, irrespective of how many times we re-start debugging the dynamic library. In our case 
@@ -333,7 +333,7 @@ Similarly to create a BuildSys project, compile this file into a dynamic library
   \end{Sinput}
 \end{Schunk}
 
-in and R session and to execute the example use,
+in and \strong{R} session and to execute the example use,
 
 \begin{Schunk}
   \begin{Sinput}
@@ -344,14 +344,14 @@ in and R session and to execute the example use,
   \end{Sinput}
 \end{Schunk}
 
-giving the identical output to the previous example. As with the C version of convolve, variable watches of 
+giving the identical output to the previous example. As with the C version of \code{convolve()}, variable watches of 
 array elements is also possible. However, in this case we require more complex expressions to do so as the 
 arrays are implemented as C++ classes rather than intrinsic C arrays. The corresponding expressions in this
 case are \code{((a).cache).start[i]}, \code{((b).cache).start[j]} and \code{(((ab).cache).start)[i+j]} as 
 shown in Figure \ref{fig:RcppDebug}.
 
 \begin{Schunk}
-  \begin{figure}[htbp]
+  \begin{figure}[h]
   {\centering \includegraphics[width=0.95\textwidth]{RcppDebug} 
 
   }
@@ -364,6 +364,8 @@ in \emph{TMB: Automatic Differentiation and Laplace Approximation}\citep{TMBlapl
 an implementation of the \emph{theta logistic population model} of \citep{WangG} and \citep{PedersenEtAl}.
 Assume the C++ source code given below is in the file \emph{"thetalog.cpp"} in the folder \emph{"\textasciitilde/thetalog"}. 
 To illustrate bounds checking the code also includes a coding error in the loops that will index beyond the array boundaries.
+Also assume the data file \emph{thetalog.dat} is in the same folder. This data file can be found at 
+\href{https://github.com/kaskr/adcomp/tree/master/tmb_examples}{https://github.com/kaskr/adcomp/tree/master/tmb\_examples}.
 
 \begin{Schunk}
   \begin{Sinput}
@@ -408,7 +410,7 @@ To illustrate bounds checking the code also includes a coding error in the loops
   \end{Sinput}
 \end{Schunk}
 
-The R code required to compile the C++ code and be readied for debugging is given by,
+The \strong{R} code required to compile the C++ code and be readied for debugging is given by,
 
 \begin{Schunk}
   \begin{verbatim}
@@ -417,41 +419,62 @@ The R code required to compile the C++ code and be readied for debugging is give
   Project <- new("BSysProject", WorkingFolder="~/thetalog", Name="thetalog")
   make(Project)
   loadLibrary(Project)
-  y <- scan("thetalog.dat", skip = 3, quiet = TRUE)
-  loadLibrary(Project)
-  data       <- list(y = y)
-  parameters <- list(u      = data$y * 0,
-                     logr0  = 0,
-                     logpsi = 0,
-                     logK   = 6,
-                     logQ   = 0,
-                     logR   = 0)
-
+  Y          <- scan("~/thetalog/thetalog.dat", skip = 3, quiet = TRUE)
+  data       <- list(Y = Y)
+  parameters <- list(X        = data$Y * 0,
+                     logr0    = 0,
+                     logtheta = 0,
+                     logK     = 6,
+                     logQ     = 0,
+                     logR     = 0)
+    
   vcDebug(Project)
   \end{verbatim}
 \end{Schunk}
 
 To debug we set a breakpoint on a part of code prior to the loop (say \code{DATA\_VECTOR(Y);}) and commence 
-the debug session in Visual Studio Code by pressing the \emph{F5} key and running the following R code 
-in the spawned R session,
+the debug session in \dfn{Visual Studio Code} by pressing the \emph{F5} key and running the following \strong{R} code 
+in the spawned \strong{R} session,
 
 \begin{Schunk}
   \begin{Sinput}
-    obj <- MakeADFun(data, parameters, random = "u", DLL = "thetalog")
+    obj <- MakeADFun(data, parameters, random = "X", DLL = "thetalog")
   \end{Sinput}
 \end{Schunk}
 
 The reason for adding the initial breakpoint is due to a limitation in (at least in the Windows version) Visual Studio Code not 
 being able to activate a configuration defined breakpoint on startup. When debugging \pkg{TMB} code \pkg{BuildSys} adds the file \emph{bsys\_abort.cpp}
-to the project. This file implements a C standard library override to the \code{abort()} function which TMB calls in response to 
+to the project. This file implements a C standard library override to the \code{abort()} function which \pkg{TMB} calls in response to 
 boundary errors in indexing. The \emph{launch.json} file includes startup commands for the debugger to set a breakpoint on the call to 
 the \emph{bsys\_abort.cpp} function but if we fail to interrupt the debug session with the added entry point breakpoint to our TMB code, this 
 abort handler breakpoint is never properly activated. Until this issue is resolved this is a suitable work around. 
 
 Having execution halt at our breakpoint line (\code{DATA\_VECTOR(Y);}), continuing exection results in the code execution halting in the \code{abort()}
-function because of the introduced boundary error. 
+function because of the introduced boundary error. This is illustrated in Figure \ref{fig:BoundsErrorA}. By clicking on the \code{objective\_function()} entry
+in the call stack we can wind the execution back to the stack frame responsible for the error and can see that the \code{i} indexing variable has a value
+of 200 which exceeds the upper bound for the \code{X[]} array (See Figure \ref{fig:BoundsErrorB}). Although not as comprehensive as the memory checking 
+provided by \emph{valgrind} this type of checking benefits from providing an immediate contextual error and requires little resources to achieve, provided 
+the library code implementing the array indexing implements such mechanisms. Unfortunately for \pkg{Rcpp} alone, it does not appear to include the level of 
+index checking available in \pkg{RcppEigen} and \pkg{TMB}. 
 
-Discuss stuff to do with array bounds exceptions.
+\begin{Schunk}
+  \begin{figure}[h]
+  {\centering \includegraphics[width=0.95\textwidth]{BoundsErrorA} 
+
+  }
+  \caption[Bounds Error Exception]{Bounds Error Exception}\label{fig:BoundsErrorA}
+  \end{figure}
+\end{Schunk}
+
+\begin{Schunk}
+  \begin{figure}[h]
+  {\centering \includegraphics[width=0.95\textwidth]{BoundsErrorB} 
+
+  }
+  \caption[Bounds Error Exception:Traced Back to the Responsible Frame]{Bounds Error Exception:Traced Back to the Responsible Frame}\label{fig:BoundsErrorB}
+  \end{figure}
+\end{Schunk}
+
 
 \hypertarget{Conclusions}{%
 \subsection{Conclusions}
