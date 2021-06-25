@@ -481,7 +481,22 @@ index checking needed to do this, although both \pkg{RcppEigen} and \pkg{TMB} do
 \subsection{Conclusions}
 \label{Conclusions}}
 
-Discuss conclusions.
+Authoring dynamic libraries to extend the capability of \strong{R} has remained a challenge due to the level of knowledge required to adequately debug such libraries.
+Whilst tools have been available they are either user unfriendly (requiring the use of command line driven interfaces) or complex to configure (\dfn{EMACS} interfacing with \dfn{GDB} 
+for example). When the code itself contains arrays implemented through complex data structures and classes (\pkg{Rcpp} for example) then visualising that data within the 
+debugger can be problematic if the debugger does not have print extensions to display those structures. \emph{Microsoft Visual Studio Code} along with the \emph{Microsoft C/C++}
+and \emph{CodeLLDB} extensions allow GUI based debugging to be carried out in most of the supported operating systems for which \strong{R} is deployed to. However, correctly 
+configuring the necessary files to support debugging and constructing a suitable debug build can present to successfully debugging dynamic libraries for \strong{R}.
+
+\pkg{BuildSys} is a package that makes the debugging of dynamic libraries for \strong{R} a simple process. It does so by firstly providing a simple means of constructing 
+\emph{makefiles} needed to compile and link the required debug build, and secondly, by providing all the required configuration files needed to debug the library using \emph{GDB/LLDB} debuggers 
+hosted within a \emph{Microsoft Visual Studio Code} session. No user configuration is required and debugging simply works as expected. The GUI hosted debugging also allows 
+the use of complex C/C++ expressions within watch windows meaning that \pkg{Rcpp}, \pkg{TMB} and \pkg{RcppEigen} data structures can be viewed within the debug session and 
+updated with program the flow. In the case of \pkg{TMB} and \pkg{RcppEigen}, \pkg{BuildSys} also provides support for trapping array bounds errors supported through the instrumentation
+provided in those libraries, making the elimination of boundary related bugs easier for the developer. 
+
+Although \pkg{BuildSys} is not geared toward package deployment and cannot function as a replacement to the \samp{R CMD SHLIB} mechanism for creating dynamic libraries, it still
+has utility to package developers. Library code can be developed first under \pkg{BuildSys} and then when fully debugged, deployed and built within an \strong{R} package using \samp{R CMD SHLIB}. 
 
 \bibliography{BuildSysReferences.bib}
 
