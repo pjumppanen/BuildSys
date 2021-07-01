@@ -17,7 +17,7 @@ productive part of the process.
 \subsection{Introduction}\label{introduction}}
 
 The process of producing functionally correct dynamic libraries for \strong{R} can be broken down into three processes: (1) code compilation to produce object files,
-(2) linking object files to produce a dynamically library and (3) runtime testing and debugging of the library code. In \strong{R} steps (1) and (2) 
+(2) linking object files to produce a dynamic library and (3) runtime testing and debugging of the library code. In \strong{R} steps (1) and (2) 
 are typically handled through the \samp{R CMD SHLIB}\citep{SHLIB} mechanism. Internally that mechanism typically relies on \dfn{GNU make}\citep{GnuMake} which 
 in turn will typically use \dfn{GCC}\citep{gcc} (on most operating systems) or \dfn{CLANG/LLVM}\citep{LLVM} (on \dfn{MacOS}). On \dfn{Windows} based systems \dfn{GNU make} and \dfn{GCC}
 are used and are made available by the \dfn{MINGW} based \dfn{Rtools} installation\citep{UsingRtools}. Compilation through \samp{R CMD SHLIB} 
@@ -28,7 +28,7 @@ libraries within \strong{R} packages, but for general use in circumstances where
 (ie. missing include paths, library paths or libraries), it can be challenging to determine the source of the error in the command line specification. Furthermore, 
 if the shared library contains many individual source files and uses of a number of static third party libraries, the required command line can become 
 unwieldy and may also require the use of a secondary \emph{Makevars} file to specify addition compiler switches. For one off library development that is not targetting
-packaging deployment but simply fulfilling a one off need, it can be easier to address the build issues in compiling a library by using a project specific makefile 
+package deployment but simply fulfilling a one off need, it can be easier to address the build issues in compiling a library by using a project specific makefile 
 and \dfn{GNU make} invocation directly rather than going through the \samp{R CMD SHLIB} mechanism. \pkg{BuildSys} takes this approach by encapsulating a makefile within 
 an S4 class that is managed from within \strong{R}.
 
@@ -81,15 +81,16 @@ this setup stage, thereby making the process of GUI hosted debugging of \strong{
 \subsection{GUI Debugging though Visual Studio Code}
 \label{visual-studio-code-extensions}}
 
-\dfn{Visual Studio Code} is a freely available and extensible cross platform text editor designed specifically for coding. It has been widely adopted in the general programming
+\dfn{Visual Studio Code} is a freely available and extensible cross platform text editor designed specifically for coding 
+(Available for \emph{Windows}, \emph{Debian}, \emph{Ubuntu}, \emph{Red Hat}, \emph{Fedora}, \emph{SUSE} and \emph{MacOS}). It has been widely adopted in the general programming
 community with a user base in excess of 2.6 million\citep{VCusers} and was \emph{the number one project in the 2017 GitHub Octoverse}. Central to the 
 popularity of the editor is the ability to customize it to particular niche needs through downloadable extensions. Of note in this particular application of \dfn{Visual Studio Code} 
 is the \emph{Microsoft C/C++ extension} \citep{VSCodeCCppExt} which, apart from providing editor feature support targeting the C and C++ languages, also provides support for 
 debugging via the machine interface to \dfn{GDB} (\dfn{GDB-MI}). It also provided debugging support on \dfn{MacOS} via \dfn{LLDB-MI}, however \emph{Apple} have since abandoned support for \dfn{LLDB-MI} making 
-the debugging support via this extension on \dfn{MacOS} inopperable. However, a third party extension, \dfn{CodeLLDB}\citep{CodeLLDB}, provides the equivalent debugging support that does not rely on
-\dfn{LLDB-MI} to interface with \dfn{LLDB} and works with current versions of \dfn{MacOS}. 
+the debugging support via this extension on \dfn{MacOS} inopperable. However, a third party extension, \dfn{CodeLLDB}\citep{CodeLLDB}, provides the equivalent debugging support (that does not rely on
+\dfn{LLDB-MI}) for \dfn{LLDB} and works with current versions of \dfn{MacOS}. 
 
-Both \emph{CodeLLDB} and the \emph{Microsoft C/C++ extension} make debugging available through added configurations. These are codified using \dfn{JSON}\citep{JSON} format configration files;
+Both \emph{CodeLLDB} and the \emph{Microsoft C/C++ extension} make debugging available through added configurations. These are codified using \dfn{JSON}\citep{JSON} format configuration files;
 one to specify how to launch or attach a debug session (the \emph{launch.json} file) and one to specify information needed to be able to correctly interpret the code within the debugging 
 session (the \emph{c\_cpp\_properties.json} file). Typical \emph{launch.json} and \emph{c\_cpp\_properties.json} files are illustrated in Figures \ref{fig:launchJSON} and \ref{fig:CnCppProp}.
 Whilst not overly complex, it is relatively easy to mis-configure and be left with partially operable or completely broken debugging. In the case of \pkg{BuildSys} these two files are 
@@ -267,7 +268,7 @@ To debug the code in an interactive GUI session call \code{vcDebug(Project)} in 
 detail in the package help (\code{{?BuildSys}} at an \strong{R} command prompt). On executing \code{vcDebug(Project)}, \strong{R} will spawn \dfn{Visual Studio Code} 
 with the correct \emph{JSON} files to debug the dynamic library. Within \dfn{Visual Studio Code} open the file \emph{"convolve.c"}, set any required
 breakpoints and then press the \emph{F5} key to start a debug session. \dfn{Visual Studio Code} will then spawn a new session of \strong{R} whose initial state
-will be the same as the state of the parent \strong{R} session when \code{vcDebug(Project)} was called. This behaviour is implemented as a aid to debugging as most 
+will be the same as the state of the parent \strong{R} session when \code{vcDebug(Project)} was called. This behaviour is implemented as an aid to debugging as most 
 debugging sessions will require an \strong{R} based test harmess to debug with and by choosing to execute \code{vcDebug(Project)} after the \strong{R} test harness is 
 set up we no longer need to repeat the process in the debugging session, irrespective of how many times we re-start debugging the dynamic library. In our case 
 the test data was already in place and the library loaded prior to calling \code{vcDebug(Project)} so in our debugging session all we need to call is \code{conv(a, b)}. 
@@ -486,14 +487,15 @@ Whilst tools have been available they are either user unfriendly (requiring the 
 for example). When the code itself contains arrays implemented through complex data structures and classes (\pkg{Rcpp} for example) then visualising that data within the 
 debugger can be problematic if the debugger does not have print extensions to display those structures. \emph{Microsoft Visual Studio Code} along with the \emph{Microsoft C/C++}
 and \emph{CodeLLDB} extensions allow GUI based debugging to be carried out in most of the supported operating systems for which \strong{R} is deployed to. However, correctly 
-configuring the necessary files to support debugging and constructing a suitable debug build can present to successfully debugging dynamic libraries for \strong{R}.
+configuring the necessary files to support debugging and constructing a suitable debug build can present a major hurdle to successfully debugging dynamic libraries for \strong{R}.
 
 \pkg{BuildSys} is a package that makes the debugging of dynamic libraries for \strong{R} a simple process. It does so by firstly providing a simple means of constructing 
 \emph{makefiles} needed to compile and link the required debug build, and secondly, by providing all the required configuration files needed to debug the library using \emph{GDB/LLDB} debuggers 
 hosted within a \emph{Microsoft Visual Studio Code} session. No user configuration is required and debugging simply works as expected. The GUI hosted debugging also allows 
 the use of complex C/C++ expressions within watch windows meaning that \pkg{Rcpp}, \pkg{TMB} and \pkg{RcppEigen} data structures can be viewed within the debug session and 
 updated with program the flow. In the case of \pkg{TMB} and \pkg{RcppEigen}, \pkg{BuildSys} also provides support for trapping array bounds errors supported through the instrumentation
-provided in those libraries, making the elimination of boundary related bugs easier for the developer. 
+provided in those libraries, making the elimination of boundary related bugs easier for the developer. \emph{Microsoft Visual Studio Code} hosted debugging is supported in 
+\emph{Windows}, \emph{Debian}, \emph{Ubuntu}, \emph{Red Hat}, \emph{Fedora}, \emph{SUSE} and \emph{MacOS} operating systems.
 
 Although \pkg{BuildSys} is not geared toward package deployment and cannot function as a replacement to the \samp{R CMD SHLIB} mechanism for creating dynamic libraries, it still
 has utility to package developers. Library code can be developed first under \pkg{BuildSys} and then when fully debugged, deployed and built within an \strong{R} package using \samp{R CMD SHLIB}. 
