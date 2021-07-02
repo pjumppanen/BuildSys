@@ -347,7 +347,10 @@ in an \strong{R} session and to execute the example we use,
 \end{Schunk}
 
 giving the identical output to the previous example. As with the C version of \code{convolve()}, watches of 
-array elements are also possible. However, in this case we require more complex expressions to do so as the 
+array elements are also possible. However, in this case we require more complex expressions\footnote{For arrays and matrices implemented In 
+C++ the indexing will generally always result in C style array access within the class implemented data structure. As such it is generally always
+possible to determine an expression that will return the element value. The required expression is determined by studying the code and the simplest
+means of revealing this detail is through single stepping (step into) through array and matrix indexing operations in the debugger.} to do so as the 
 arrays are implemented as C++ classes rather than intrinsic C arrays. The corresponding expressions in this
 case are \code{((a).cache).start[i]}, \code{((b).cache).start[j]} and \code{(((ab).cache).start)[i+j]} as 
 shown in Figure \ref{fig:RcppDebug}.
